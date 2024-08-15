@@ -25,7 +25,7 @@ public class ProtectorsService {
 
     public Protectors createProtector(Protectors protectors) {
         if (protectors.getPhoto() == null || protectors.getPhoto().isEmpty()) {
-            protectors.setPhoto("/images/default-protector.jpg"); // Asigna la imagen por defecto si no se proporciona ninguna
+            protectors.setPhoto("/images/default-protector.jpg");
         }
         return protectorsRepository.save(protectors);
     }
