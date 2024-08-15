@@ -22,7 +22,7 @@ public class Post {
     private String name;
     private Integer age;
     private String animalType;
-    private Boolean vaccinate;
+    private Boolean vaccinated;
     private String breed;
     private Boolean ppp;
     private String city;

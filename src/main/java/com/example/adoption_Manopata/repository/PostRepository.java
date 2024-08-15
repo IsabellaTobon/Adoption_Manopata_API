@@ -1,4 +1,9 @@
 package com.example.adoption_Manopata.repository;
 
-public class PostRepository {
+import com.example.adoption_Manopata.model.Post;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.UUID;
+
+public interface PostRepository extends JpaRepository<Post, UUID> {
 }
