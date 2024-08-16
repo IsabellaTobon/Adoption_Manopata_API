@@ -31,4 +31,7 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "role")
     private Role role;
+
+    @Column(nullable = false)
+    private boolean deleted = false;
 }

@@ -1,9 +1,9 @@
-package com.example.adoption_Manopata.controller;
+package com.example.adoption_Manopata.dto;
 
 import lombok.Data;
 
 @Data
 public class AuthRequest {
-    private String username;
+    private String nickname;
     private String password;
 }

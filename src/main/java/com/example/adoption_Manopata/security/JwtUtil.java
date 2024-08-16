@@ -68,4 +68,14 @@ public class JwtUtil {
         final String nickname = extractUsername(token);
         return (nickname.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
+
+    // Method to generate a JWT token with email
+    public String generateTokenWithEmail(String email) {
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // Token válido por 1 hora
+                .signWith(getSigningKey())
+                .compact();
+    }
 }
