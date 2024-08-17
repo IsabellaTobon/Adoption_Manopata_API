@@ -2,10 +2,12 @@ package com.example.adoption_Manopata.service;
 
 import com.example.adoption_Manopata.model.Post;
 import com.example.adoption_Manopata.repository.PostRepository;
+import com.example.adoption_Manopata.specification.PostSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -19,8 +21,16 @@ public class PostService {
 
     // Obtain all posts with filters
     public Page<Post> getFilteredPosts(String province, String city, String breed, String animalType, Boolean available, Boolean isPPP, Boolean vaccinated, Pageable pageable) {
-        // Implementa los filtros y la paginación aquí, posiblemente utilizando un Specification o Criteria API
-        return postRepository.findAll(pageable); // Ejemplo básico, debes implementar los filtros aquí
+        Specification<Post> spec = Specification
+                .where(PostSpecification.hasProvince(province))
+                .and(PostSpecification.hasCity(city))
+                .and(PostSpecification.hasBreed(breed))
+                .and(PostSpecification.hasAnimalType(animalType))
+                .and(PostSpecification.isAvailable(available))
+                .and(PostSpecification.isPPP(isPPP))
+                .and(PostSpecification.isVaccinated(vaccinated));
+
+        return postRepository.findAll(spec, pageable);
     }
 
     // Obtain post by id
