@@ -1,7 +1,11 @@
 package com.example.adoption_Manopata.controller;
 
 import com.example.adoption_Manopata.model.Message;
+import com.example.adoption_Manopata.model.Post;
+import com.example.adoption_Manopata.model.User;
 import com.example.adoption_Manopata.service.MessageService;
+import com.example.adoption_Manopata.service.PostService;
+import com.example.adoption_Manopata.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,38 +15,44 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/message")
+@RequestMapping("/api/messages")
 public class MessageController {
 
     @Autowired
     private MessageService messageService;
 
-    @GetMapping
-    public List<Message> getAllMessages() {
-        return messageService.getAllMessages();
-    }
+    @Autowired
+    private UserService userService;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Message> getMessageById(@PathVariable UUID id) {
-        Optional<Message> message = messageService.getMessageById(id);
-        return message.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
+    @Autowired
+    private PostService postService;
 
-    @PostMapping
-    public Message createMessage(@RequestBody Message message) {
-        return messageService.createMessage(message);
-    }
+    @PostMapping("/send")
+    public ResponseEntity<Message> sendMessage(@RequestParam UUID senderId,
+                                               @RequestParam UUID receiverId,
+                                               @RequestParam String bodyText,
+                                               @RequestParam UUID postId) {
+        // Obtener sender, receiver y post a partir de sus IDs
+        User sender = userService.getUserById(senderId)
+                .orElseThrow(() -> new RuntimeException("Sender not found"));
+        User receiver = userService.getUserById(receiverId)
+                .orElseThrow(() -> new RuntimeException("Receiver not found"));
+        Post post = postService.getPostById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Message> updateMessage(@PathVariable UUID id, @RequestBody Message messageDetails) {
-        Message message = messageService.updateMessage(id, messageDetails);
+        Message message = messageService.sendMessage(sender, receiver, bodyText, post);
         return ResponseEntity.ok(message);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMessage(@PathVariable UUID id) {
-        messageService.deleteMessage(id);
-        return ResponseEntity.ok().build();
+    @GetMapping("/inbox")
+    public ResponseEntity<List<Message>> getInboxMessages(@RequestParam UUID userId) {
+        List<Message> messages = messageService.getInboxMessages(userId);
+        return ResponseEntity.ok(messages);
+    }
+
+    @GetMapping("/sent")
+    public ResponseEntity<List<Message>> getSentMessages(@RequestParam UUID userId) {
+        List<Message> messages = messageService.getSentMessages(userId);
+        return ResponseEntity.ok(messages);
     }
 }
