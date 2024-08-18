@@ -1,22 +1,22 @@
--- Crear tabla roles si no existe
+-- Create roles table if doesn't exist
 CREATE TABLE IF NOT EXISTS roles (
     name VARCHAR(20) PRIMARY KEY NOT NULL,
     description VARCHAR(100) NOT NULL
 );
-
--- Crear tabla users si no existe
+-- Create users table if doesn't exist
 CREATE TABLE IF NOT EXISTS users (
     id CHAR(36) PRIMARY KEY NOT NULL,
-    name VARCHAR(100) NOT NULL,
-    lastname VARCHAR(100) NOT NULL,
+    name VARCHAR(50) NOT NULL,
+    lastname VARCHAR(50) NOT NULL,
     nickname VARCHAR(20) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     role VARCHAR(20) NOT NULL,
+    active BOOLEAN DEFAULT TRUE NOT NULL,
     FOREIGN KEY (role) REFERENCES roles(name)
 );
 
--- Crear tabla posts si no existe
+-- Create posts table if doesn't exist
 CREATE TABLE IF NOT EXISTS posts (
     id CHAR(36) PRIMARY KEY NOT NULL,
     photo TEXT NOT NULL,
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS posts (
     FOREIGN KEY (userId) REFERENCES users(id)
 );
 
--- Crear tabla messages si no existe
+-- Create messages table if doesn't exist
 CREATE TABLE IF NOT EXISTS messages (
     id CHAR(36) PRIMARY KEY NOT NULL,
     bodyText TEXT NOT NULL,
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS messages (
     FOREIGN KEY (postId) REFERENCES posts(id)
 );
 
--- Crear tabla protectors si no existe
+-- Create protectors table if doesn't exist
 CREATE TABLE IF NOT EXISTS protectors (
     id CHAR(36) PRIMARY KEY NOT NULL,
     name VARCHAR(50) NOT NULL,
@@ -57,3 +57,4 @@ CREATE TABLE IF NOT EXISTS protectors (
     phone VARCHAR(13) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE
 );
+

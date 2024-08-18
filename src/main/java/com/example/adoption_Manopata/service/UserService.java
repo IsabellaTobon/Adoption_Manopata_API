@@ -98,4 +98,11 @@ public class UserService {
             throw new RuntimeException("Usuario no encontrado.");
         }
     }
+
+    public void deactivateUser(UUID id) {
+        userRepository.findById(id).ifPresent(user -> {
+            user.setActive(false);
+            userRepository.save(user);
+        });
+    }
 }

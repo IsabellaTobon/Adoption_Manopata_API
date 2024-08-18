@@ -35,4 +35,7 @@ public class User {
     @Column(nullable = false)
     private boolean deleted = false;
 
+    @Column(nullable = false)
+    private boolean active = true;
+
 }

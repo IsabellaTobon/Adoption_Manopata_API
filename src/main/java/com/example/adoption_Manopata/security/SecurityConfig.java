@@ -33,6 +33,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")  // Only admins can acces
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
