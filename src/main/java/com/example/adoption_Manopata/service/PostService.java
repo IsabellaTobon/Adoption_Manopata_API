@@ -10,6 +10,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -40,6 +44,9 @@ public class PostService {
 
     // Create a new post
     public Post createPost(Post post) {
+        if (post.getPhoto() == null || post.getPhoto().isEmpty()) {
+            throw new IllegalArgumentException("La imagen es obligatoria para crear un post.");
+        }
         return postRepository.save(post);
     }
 
@@ -47,6 +54,9 @@ public class PostService {
     public Post updatePost(UUID id, Post postDetails) {
         return postRepository.findById(id)
                 .map(post -> {
+                    if (postDetails.getPhoto() == null || postDetails.getPhoto().isEmpty()) {
+                        throw new IllegalArgumentException("La imagen es obligatoria para actualizar el post.");
+                    }
                     post.setName(postDetails.getName());
                     post.setBreed(postDetails.getBreed());
                     post.setAnimalType(postDetails.getAnimalType());
@@ -64,7 +74,20 @@ public class PostService {
 
     // Delete a post
     public void deletePost(UUID id) {
-        postRepository.deleteById(id);
+        postRepository.findById(id).ifPresent(post -> {
+            // Ruta donde están almacenadas las imágenes
+            Path imagePath = Paths.get("path/to/your/images/directory", post.getPhoto());
+
+            // Eliminar la imagen asociada
+            try {
+                Files.deleteIfExists(imagePath);
+            } catch (IOException e) {
+                throw new RuntimeException("Error al eliminar la imagen asociada", e);
+            }
+
+            // Eliminar el post
+            postRepository.deleteById(id);
+        });
     }
 
     // Increase likes of a post
