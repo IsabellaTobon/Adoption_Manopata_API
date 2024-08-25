@@ -3,6 +3,7 @@ package com.example.adoption_Manopata.model;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -16,7 +17,8 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Protectors {
+@Table(name = "protectors")
+public class Protector {
 
     @Id
     @GeneratedValue
@@ -46,7 +48,7 @@ public class Protectors {
     @NotBlank(message = "La provincia es obligatoria")
     private String province;
 
-    @NotBlank(message = "La dirección es obligatoria")
+//    @NotBlank(message = "La dirección es obligatoria")
     private String address;
 
     @Size(max = 255)

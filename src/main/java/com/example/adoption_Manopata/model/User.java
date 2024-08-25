@@ -11,9 +11,11 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "users")
 public class User {
     @Id
     @GeneratedValue
+@Column(columnDefinition = "CHAR(36)")
     private UUID id;
 
     private String name;
@@ -29,7 +31,7 @@ public class User {
     private String password;
 
     @ManyToOne
-    @JoinColumn(name = "role")
+    @JoinColumn(name = "role", referencedColumnName = "name")
     private Role role;
 
     @Column(nullable = false)

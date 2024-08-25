@@ -1,6 +1,6 @@
 package com.example.adoption_Manopata.service;
 
-import com.example.adoption_Manopata.model.Protectors;
+import com.example.adoption_Manopata.model.Protector;
 import com.example.adoption_Manopata.repository.ProtectorsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,22 +15,22 @@ public class ProtectorsService {
     @Autowired
     private ProtectorsRepository protectorsRepository;
 
-    public List<Protectors> getAllProtectors() {
+    public List<Protector> getAllProtectors() {
         return protectorsRepository.findAll();
     }
 
-    public Optional<Protectors> getProtectorById(UUID id) {
+    public Optional<Protector> getProtectorById(UUID id) {
         return protectorsRepository.findById(id);
     }
 
-    public Protectors createProtector(Protectors protectors) {
-        if (protectors.getPhoto() == null || protectors.getPhoto().isEmpty()) {
-            protectors.setPhoto("/images/default-protector.jpg");
+    public Protector createProtector(Protector protector) {
+        if (protector.getPhoto() == null || protector.getPhoto().isEmpty()) {
+            protector.setPhoto("/images/default-protector.jpg");
         }
-        return protectorsRepository.save(protectors);
+        return protectorsRepository.save(protector);
     }
 
-    public Protectors updateProtector(UUID id, Protectors protectorDetails) {
+    public Protector updateProtector(UUID id, Protector protectorDetails) {
         return protectorsRepository.findById(id)
                 .map(protector -> {
                     protector.setName(protectorDetails.getName());

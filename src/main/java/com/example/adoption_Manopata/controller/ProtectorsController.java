@@ -1,6 +1,6 @@
 package com.example.adoption_Manopata.controller;
 
-import com.example.adoption_Manopata.model.Protectors;
+import com.example.adoption_Manopata.model.Protector;
 import com.example.adoption_Manopata.service.ProtectorsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,28 +19,28 @@ public class ProtectorsController {
 
     // Obtain all protectors
     @GetMapping
-    public List<Protectors> getAllProtectors() {
+    public List<Protector> getAllProtectors() {
         return protectorsService.getAllProtectors();
     }
 
     // Obtain protector by id
     @GetMapping("/{id}")
-    public ResponseEntity<Protectors> getProtectorById(@PathVariable UUID id) {
-        Optional<Protectors> protectors = protectorsService.getProtectorById(id);
+    public ResponseEntity<Protector> getProtectorById(@PathVariable UUID id) {
+        Optional<Protector> protectors = protectorsService.getProtectorById(id);
         return protectors.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     // Create a new protector
     @PostMapping
-    public Protectors createProtector(@RequestBody Protectors protectors) {
-        return protectorsService.createProtector(protectors);
+    public Protector createProtector(@RequestBody Protector protector) {
+        return protectorsService.createProtector(protector);
     }
 
     // Update a protector
     @PutMapping("/{id}")
-    public ResponseEntity<Protectors> updateProtector(@PathVariable UUID id, @RequestBody Protectors protectorDetails) {
-        Protectors updatedProtector = protectorsService.updateProtector(id, protectorDetails);
+    public ResponseEntity<Protector> updateProtector(@PathVariable UUID id, @RequestBody Protector protectorDetails) {
+        Protector updatedProtector = protectorsService.updateProtector(id, protectorDetails);
         return ResponseEntity.ok(updatedProtector);
     }
 
