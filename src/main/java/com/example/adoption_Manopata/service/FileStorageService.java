@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.UUID;
 
 @Service
 public class FileStorageService {
@@ -17,7 +16,7 @@ public class FileStorageService {
 
     public String storeFile(MultipartFile file) throws IOException {
         // Generate a unique file name
-        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
 
         // Create the directory if it doesn't exist
         Path uploadPath = Paths.get(uploadDir);

@@ -16,7 +16,7 @@ import java.util.function.Function;
 public class JwtUtil {
 
     // Base64 encoded secret key for signing the token
-    private final String SECRET_KEY_BASE64 = "AwWUdHQSht07v1fzJxisIV13Bv/z3Wl5ggu8B21UNcY=";
+    private final String SECRET_KEY_BASE64 = "qsnwZKi/aBxrrh1ATH3UoZx62I9Lkx7JgPxaCXuqSC8=";
 
 
     // Method to decode the key and obtain the signature key

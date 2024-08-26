@@ -11,8 +11,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
 @Entity
 @Data
 @NoArgsConstructor
@@ -22,7 +20,7 @@ public class Protector {
 
     @Id
     @GeneratedValue
-    private UUID id;
+    private Long id;
 
     @Size(max = 255)
     private String photo;

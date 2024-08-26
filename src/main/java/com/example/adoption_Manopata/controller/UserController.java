@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +20,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @GetMapping
     public List<User> getAllUsers() {
@@ -44,10 +48,45 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
-        User user = userService.updateUser(id, userDetails);
-        return ResponseEntity.ok(user);
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
+        // Get the authenticated user
+        UserDetails loggedInUser = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String loggedInUsername = loggedInUser.getUsername();
+
+        // Search the user in the database
+        Optional<User> optionalUser = userService.getUserById(id);
+
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+
+            // Verify if the nickname in the request matches the logged-in user
+            if (!user.getNickname().equals(loggedInUsername)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para actualizar este usuario.");
+            }
+
+            // Verify the password before proceeding with the update
+            if (!passwordEncoder.matches(userDetails.getPassword(), user.getPassword())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("La contraseña es incorrecta.");
+            }
+
+            // Update data (except role and ID)
+            if (userDetails.getName() != null) user.setName(userDetails.getName());
+            if (userDetails.getLastname() != null) user.setLastname(userDetails.getLastname());
+            if (userDetails.getEmail() != null) user.setEmail(userDetails.getEmail());
+
+            // If a new password is provided, encrypt it and save it
+            if (userDetails.getPassword() != null && !userDetails.getPassword().isEmpty()) {
+                user.setPassword(passwordEncoder.encode(userDetails.getPassword()));
+            }
+
+            userService.save(user);
+
+            return ResponseEntity.ok(user);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado.");
+        }
     }
+
 
     @PostMapping("/delete-account")
     public ResponseEntity<String> deleteAccount(@RequestBody DeleteAccountRequest deleteAccountRequest) {
@@ -58,7 +97,7 @@ public class UserController {
         User user = userService.findByNickname(loggedInUsername)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado."));
 
-        // Verify if the nickname in the request matches the logged in user
+        // Verify if the nickname in the request matches the logged-in user
         if (!user.getNickname().equals(deleteAccountRequest.getNickname())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para eliminar esta cuenta.");
         }
@@ -72,5 +111,4 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No se pudo eliminar la cuenta.");
         }
     }
-
 }

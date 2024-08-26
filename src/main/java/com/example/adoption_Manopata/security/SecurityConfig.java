@@ -64,14 +64,4 @@ public class SecurityConfig {
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
-
-    // BORRAR ESTE MÉTODO DESPUÉS DE USARLO
-    public static class PasswordGenerator {
-        public static void main(String[] args) {
-            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-            String rawPassword = "password123";  // La contraseña que quieres encriptar
-            String encodedPassword = encoder.encode(rawPassword);
-            System.out.println(encodedPassword);  // Este es el hash que usarás en tu SQL insert
-        }
-    }
 }
