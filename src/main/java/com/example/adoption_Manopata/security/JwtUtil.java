@@ -16,11 +16,12 @@ import java.util.function.Function;
 public class JwtUtil {
 
     // Base64 encoded secret key for signing the token
-    private final String SECRET_KEY_BASE64 = "C14v3-Pr0y3c70-F1n41-7fm";
+    private final String SECRET_KEY_BASE64 = "AwWUdHQSht07v1fzJxisIV13Bv/z3Wl5ggu8B21UNcY=";
+
 
     // Method to decode the key and obtain the signature key
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(Base64.getDecoder().decode(SECRET_KEY_BASE64.getBytes()));
+        return Keys.hmacShaKeyFor(Base64.getDecoder().decode(SECRET_KEY_BASE64));
     }
 
     // Method to generate a JWT token
