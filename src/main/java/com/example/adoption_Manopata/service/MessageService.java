@@ -9,8 +9,6 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class MessageService {
@@ -30,12 +28,12 @@ public class MessageService {
     }
 
     // Obtain all messages received
-    public List<Message> getInboxMessages(UUID userId) {
+    public List<Message> getInboxMessages(Long userId) {
         return messageRepository.findByReceiverId(userId);
     }
 
     // Obtain all messages sent
-    public List<Message> getSentMessages(UUID userId) {
+    public List<Message> getSentMessages(Long userId) {
         return messageRepository.findBySenderId(userId);
     }
 

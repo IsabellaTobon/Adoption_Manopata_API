@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class UserService {
@@ -22,7 +21,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public Optional<User> getUserById(UUID id) {
+    public Optional<User> getUserById(Long id) {
         return userRepository.findById(id);
     }
 
@@ -50,7 +49,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public User updateUser(UUID id, User userDetails) {
+    public User updateUser(Long id, User userDetails) {
         return userRepository.findById(id)
                 .map(user -> {
                     user.setName(userDetails.getName());
@@ -63,7 +62,7 @@ public class UserService {
                 }).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    public boolean changePassword(UUID userId, String oldPassword, String newPassword) {
+    public boolean changePassword(Long userId, String oldPassword, String newPassword) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
@@ -81,7 +80,7 @@ public class UserService {
         return false;
     }
 
-    public boolean deleteUser(UUID userId, String password) {
+    public boolean deleteUser(Long userId, String password) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
@@ -99,7 +98,7 @@ public class UserService {
         }
     }
 
-    public void deactivateUser(UUID id) {
+    public void deactivateUser(Long id) {
         userRepository.findById(id).ifPresent(user -> {
             user.setActive(false);
             userRepository.save(user);

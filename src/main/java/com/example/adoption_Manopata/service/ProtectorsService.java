@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class ProtectorsService {
@@ -19,7 +18,7 @@ public class ProtectorsService {
         return protectorsRepository.findAll();
     }
 
-    public Optional<Protector> getProtectorById(UUID id) {
+    public Optional<Protector> getProtectorById(Long id) {
         return protectorsRepository.findById(id);
     }
 
@@ -30,7 +29,7 @@ public class ProtectorsService {
         return protectorsRepository.save(protector);
     }
 
-    public Protector updateProtector(UUID id, Protector protectorDetails) {
+    public Protector updateProtector(Long id, Protector protectorDetails) {
         return protectorsRepository.findById(id)
                 .map(protector -> {
                     protector.setName(protectorDetails.getName());
@@ -48,7 +47,7 @@ public class ProtectorsService {
                 }).orElseThrow(() -> new RuntimeException("Protector not found"));
     }
 
-    public void deleteProtector(UUID id) {
+    public void deleteProtector(Long id) {
         protectorsRepository.deleteById(id);
     }
 }

@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/protectors")
@@ -25,7 +24,7 @@ public class ProtectorsController {
 
     // Obtain protector by id
     @GetMapping("/{id}")
-    public ResponseEntity<Protector> getProtectorById(@PathVariable UUID id) {
+    public ResponseEntity<Protector> getProtectorById(@PathVariable Long id) {
         Optional<Protector> protectors = protectorsService.getProtectorById(id);
         return protectors.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -39,14 +38,14 @@ public class ProtectorsController {
 
     // Update a protector
     @PutMapping("/{id}")
-    public ResponseEntity<Protector> updateProtector(@PathVariable UUID id, @RequestBody Protector protectorDetails) {
+    public ResponseEntity<Protector> updateProtector(@PathVariable Long id, @RequestBody Protector protectorDetails) {
         Protector updatedProtector = protectorsService.updateProtector(id, protectorDetails);
         return ResponseEntity.ok(updatedProtector);
     }
 
     // Delete a protector
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProtector(@PathVariable UUID id) {
+    public ResponseEntity<Void> deleteProtector(@PathVariable Long id) {
         protectorsService.deleteProtector(id);
         return ResponseEntity.ok().build();
     }

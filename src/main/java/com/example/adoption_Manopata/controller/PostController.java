@@ -8,9 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/post")
@@ -36,7 +34,7 @@ public class PostController {
 
     // Obtain post by id
     @GetMapping("/{id}")
-    public ResponseEntity<Post> getPostById(@PathVariable UUID id) {
+    public ResponseEntity<Post> getPostById(@PathVariable Long id) {
         Optional<Post> post = postService.getPostById(id);
         return post.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -50,28 +48,28 @@ public class PostController {
 
     // Update a post
     @PutMapping("/{id}")
-    public ResponseEntity<Post> updatePost(@PathVariable UUID id, @RequestBody Post postDetails) {
+    public ResponseEntity<Post> updatePost(@PathVariable Long id, @RequestBody Post postDetails) {
         Post post = postService.updatePost(id, postDetails);
         return ResponseEntity.ok(post);
     }
 
     // Delete a post
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePost(@PathVariable UUID id) {
+    public ResponseEntity<Void> deletePost(@PathVariable Long id) {
         postService.deletePost(id);
         return ResponseEntity.ok().build();
     }
 
     // Increment likes of a post
     @PostMapping("/{id}/like")
-    public ResponseEntity<Post> likePost(@PathVariable UUID id) {
+    public ResponseEntity<Post> likePost(@PathVariable Long id) {
         Post post = postService.incrementLikes(id);
         return ResponseEntity.ok(post);
     }
 
     // Obtain posts by user id
     @GetMapping("/user/{userId}")
-    public Page<Post> getPostsByUser(@PathVariable UUID userId,
+    public Page<Post> getPostsByUser(@PathVariable Long userId,
                                      @RequestParam(defaultValue = "0") int page,
                                      @RequestParam(defaultValue = "10") int size) {
         return postService.getPostsByUser(userId, page, size);

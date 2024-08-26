@@ -3,9 +3,10 @@ CREATE TABLE IF NOT EXISTS roles (
     name VARCHAR(20) PRIMARY KEY NOT NULL,
     description VARCHAR(100) NOT NULL
 );
+
 -- Create users table if doesn't exist
 CREATE TABLE IF NOT EXISTS users (
-    id CHAR(36) PRIMARY KEY NOT NULL,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,
     name VARCHAR(50) NOT NULL,
     lastname VARCHAR(50) NOT NULL,
     nickname VARCHAR(20) NOT NULL UNIQUE,
@@ -13,14 +14,15 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255) NOT NULL,
     role VARCHAR(20) NOT NULL,
     active BOOLEAN DEFAULT TRUE NOT NULL,
+    deleted BOOLEAN DEFAULT FALSE NOT NULL,
     FOREIGN KEY (role) REFERENCES roles(name)
 );
 
 -- Create posts table if doesn't exist
 CREATE TABLE IF NOT EXISTS posts (
-    id CHAR(36) PRIMARY KEY NOT NULL,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,
     photo TEXT NOT NULL,
-    registerDate DATE NOT NULL,
+    registerDate TIMESTAMP NOT NULL,
     name VARCHAR(100) NOT NULL,
     age INT NOT NULL,
     animalType VARCHAR(30) NOT NULL,
@@ -31,19 +33,19 @@ CREATE TABLE IF NOT EXISTS posts (
     province VARCHAR(50) NOT NULL,
     available BOOLEAN,
     likes INT DEFAULT 0,
-    userId CHAR(36) NOT NULL,
+    userId BIGINT NOT NULL,
     description TEXT NOT NULL,
     FOREIGN KEY (userId) REFERENCES users(id)
 );
 
 -- Create messages table if doesn't exist
 CREATE TABLE IF NOT EXISTS messages (
-    id CHAR(36) PRIMARY KEY NOT NULL,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,
     bodyText TEXT NOT NULL,
     sentDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    senderId CHAR(36) NOT NULL,
-    receiverId CHAR(36) NOT NULL,
-    postId CHAR(36) NOT NULL,
+    senderId BIGINT NOT NULL,
+    receiverId BIGINT NOT NULL,
+    postId BIGINT NOT NULL,
     FOREIGN KEY (senderId) REFERENCES users(id),
     FOREIGN KEY (receiverId) REFERENCES users(id),
     FOREIGN KEY (postId) REFERENCES posts(id)
@@ -51,10 +53,9 @@ CREATE TABLE IF NOT EXISTS messages (
 
 -- Create protectors table if doesn't exist
 CREATE TABLE IF NOT EXISTS protectors (
-    id CHAR(36) PRIMARY KEY NOT NULL,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,
     name VARCHAR(50) NOT NULL,
     description TEXT NOT NULL,
     phone VARCHAR(13) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE
 );
-

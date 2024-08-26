@@ -4,11 +4,10 @@ import com.example.adoption_Manopata.model.Message;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
-import java.util.UUID;
 
-public interface MessageRepository extends JpaRepository <Message, UUID> {
+public interface MessageRepository extends JpaRepository <Message, Long> {
 
-    List<Message> findByReceiverId(UUID receiverId);
+    List<Message> findByReceiverId(Long receiverId);
 
-    List<Message> findBySenderId(UUID senderId);
+    List<Message> findBySenderId(Long senderId);
 }

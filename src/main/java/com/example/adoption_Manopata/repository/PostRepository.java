@@ -8,13 +8,11 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 
-import java.util.UUID;
-
 @Repository
-public interface PostRepository extends JpaRepository<Post, UUID>, JpaSpecificationExecutor<Post> {
+public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificationExecutor<Post> {
 
     // Method to find all posts by user id with pagination
-    Page<Post> findByUserId(UUID userId, Pageable pageable);
+    Page<Post> findByUserId(Long userId, Pageable pageable);
 
     // Method to find posts by filters with pagination
     Page<Post> findByProvinceAndCityAndBreedAndAnimalTypeAndAvailableAndPppAndVaccinated(

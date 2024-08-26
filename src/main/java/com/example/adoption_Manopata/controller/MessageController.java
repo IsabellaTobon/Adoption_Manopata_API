@@ -11,8 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+
 
 @RestController
 @RequestMapping("/api/messages")
@@ -28,10 +27,10 @@ public class MessageController {
     private PostService postService;
 
     @PostMapping("/send")
-    public ResponseEntity<Message> sendMessage(@RequestParam UUID senderId,
-                                               @RequestParam UUID receiverId,
+    public ResponseEntity<Message> sendMessage(@RequestParam Long senderId,
+                                               @RequestParam Long receiverId,
                                                @RequestParam String bodyText,
-                                               @RequestParam UUID postId) {
+                                               @RequestParam Long postId) {
         // Obtener sender, receiver y post a partir de sus IDs
         User sender = userService.getUserById(senderId)
                 .orElseThrow(() -> new RuntimeException("Sender not found"));
@@ -45,13 +44,13 @@ public class MessageController {
     }
 
     @GetMapping("/inbox")
-    public ResponseEntity<List<Message>> getInboxMessages(@RequestParam UUID userId) {
+    public ResponseEntity<List<Message>> getInboxMessages(@RequestParam Long userId) {
         List<Message> messages = messageService.getInboxMessages(userId);
         return ResponseEntity.ok(messages);
     }
 
     @GetMapping("/sent")
-    public ResponseEntity<List<Message>> getSentMessages(@RequestParam UUID userId) {
+    public ResponseEntity<List<Message>> getSentMessages(@RequestParam Long userId) {
         List<Message> messages = messageService.getSentMessages(userId);
         return ResponseEntity.ok(messages);
     }

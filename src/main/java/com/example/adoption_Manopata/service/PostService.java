@@ -15,7 +15,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class PostService {
@@ -38,7 +37,7 @@ public class PostService {
     }
 
     // Obtain post by id
-    public Optional<Post> getPostById(UUID id) {
+    public Optional<Post> getPostById(Long id) {
         return postRepository.findById(id);
     }
 
@@ -51,7 +50,7 @@ public class PostService {
     }
 
     // Update a post
-    public Post updatePost(UUID id, Post postDetails) {
+    public Post updatePost(Long id, Post postDetails) {
         return postRepository.findById(id)
                 .map(post -> {
                     if (postDetails.getPhoto() == null || postDetails.getPhoto().isEmpty()) {
@@ -73,7 +72,7 @@ public class PostService {
     }
 
     // Delete a post
-    public void deletePost(UUID id) {
+    public void deletePost(Long id) {
         postRepository.findById(id).ifPresent(post -> {
             // Ruta donde están almacenadas las imágenes
             Path imagePath = Paths.get("path/to/your/images/directory", post.getPhoto());
@@ -91,7 +90,7 @@ public class PostService {
     }
 
     // Increase likes of a post
-    public Post incrementLikes(UUID id) {
+    public Post incrementLikes(Long id) {
         return postRepository.findById(id)
                 .map(post -> {
                     post.setLikes(post.getLikes() + 1);
@@ -100,7 +99,7 @@ public class PostService {
     }
 
     // Obtain all posts by user id
-    public Page<Post> getPostsByUser(UUID userId, int page, int size) {
+    public Page<Post> getPostsByUser(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return postRepository.findByUserId(userId, pageable);
     }
