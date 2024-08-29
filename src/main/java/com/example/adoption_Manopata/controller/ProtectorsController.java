@@ -3,7 +3,10 @@ package com.example.adoption_Manopata.controller;
 import com.example.adoption_Manopata.model.Protector;
 import com.example.adoption_Manopata.service.ProtectorsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,6 +33,13 @@ public class ProtectorsController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/name/{name}")
+    public ResponseEntity<Protector> getProtectorByName(@PathVariable String name) { // New endpoint
+        Optional<Protector> protector = protectorsService.getProtectorByName(name);
+        return protector.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
     // Create a new protector
     @PostMapping
     public Protector createProtector(@RequestBody Protector protector) {
@@ -39,6 +49,16 @@ public class ProtectorsController {
     // Update a protector
     @PutMapping("/{id}")
     public ResponseEntity<Protector> updateProtector(@PathVariable Long id, @RequestBody Protector protectorDetails) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String loggedInUsername = userDetails.getUsername();
+
+        Protector protector = protectorsService.getProtectorById(id)
+                .orElseThrow(() -> new RuntimeException("Protector not found"));
+
+        if (!protector.getEmail().equals(loggedInUsername)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+
         Protector updatedProtector = protectorsService.updateProtector(id, protectorDetails);
         return ResponseEntity.ok(updatedProtector);
     }
@@ -46,6 +66,16 @@ public class ProtectorsController {
     // Delete a protector
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProtector(@PathVariable Long id) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String loggedInUsername = userDetails.getUsername();
+
+        Protector protector = protectorsService.getProtectorById(id)
+                .orElseThrow(() -> new RuntimeException("Protector not found"));
+
+        if (!protector.getEmail().equals(loggedInUsername)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         protectorsService.deleteProtector(id);
         return ResponseEntity.ok().build();
     }

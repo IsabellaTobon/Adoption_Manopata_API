@@ -1,5 +1,6 @@
 package com.example.adoption_Manopata.service;
 
+import com.example.adoption_Manopata.model.Role;
 import com.example.adoption_Manopata.model.User;
 import com.example.adoption_Manopata.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,15 @@ public class UserService {
     }
 
     public User createUser(User user) {
+
+        // Checks if role is null or empty, and sets "USER" by default
+        if (user.getRole() == null || user.getRole().getName().isEmpty()) {
+            user.setRole(new Role("USER"));
+        }
+
+        // Encode the password before saving it
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
         return userRepository.save(user);
     }
 

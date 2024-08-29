@@ -1,5 +1,6 @@
 package com.example.adoption_Manopata.controller;
 
+import com.example.adoption_Manopata.dto.ChangePasswordRequest;
 import com.example.adoption_Manopata.dto.DeleteAccountRequest;
 import com.example.adoption_Manopata.model.User;
 import com.example.adoption_Manopata.service.UserService;
@@ -73,20 +74,58 @@ public class UserController {
             if (userDetails.getName() != null) user.setName(userDetails.getName());
             if (userDetails.getLastname() != null) user.setLastname(userDetails.getLastname());
             if (userDetails.getEmail() != null) user.setEmail(userDetails.getEmail());
-
-            // If a new password is provided, encrypt it and save it
-            if (userDetails.getPassword() != null && !userDetails.getPassword().isEmpty()) {
-                user.setPassword(passwordEncoder.encode(userDetails.getPassword()));
+            if (userDetails.getNickname() != null && !userDetails.getNickname().equals(user.getNickname())) {
+                // Check if the new nickname is already in use
+                if (userService.existsByNickname(userDetails.getNickname())) {
+                    return ResponseEntity.status(HttpStatus.CONFLICT).body("El nombre de usuario ya está en uso.");
+                }
+                user.setNickname(userDetails.getNickname());
             }
 
+                // If a new password is provided, encrypt it and save it
+                if (userDetails.getPassword() != null && !userDetails.getPassword().isEmpty()) {
+                    user.setPassword(passwordEncoder.encode(userDetails.getPassword()));
+                }
+
+                userService.save(user);
+
+                return ResponseEntity.ok(user);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado.");
+            }
+        }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
+        // Get the authenticated user
+        UserDetails loggedInUser = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String loggedInUsername = loggedInUser.getUsername();
+
+        // Search the user in the database by nickname
+        Optional<User> optionalUser = userService.findByNickname(changePasswordRequest.getNickname());
+
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+
+            // Verify if the nickname in the request matches the logged-in user
+            if (!user.getNickname().equals(loggedInUsername)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para cambiar la contraseña de este usuario.");
+            }
+
+            // Verify the old password before proceeding with the update
+            if (!passwordEncoder.matches(changePasswordRequest.getOldPassword(), user.getPassword())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("La contraseña actual es incorrecta.");
+            }
+
+            // Set the new password
+            user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
             userService.save(user);
 
-            return ResponseEntity.ok(user);
+            return ResponseEntity.ok("Contraseña actualizada correctamente.");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado.");
         }
     }
-
 
     @PostMapping("/delete-account")
     public ResponseEntity<String> deleteAccount(@RequestBody DeleteAccountRequest deleteAccountRequest) {

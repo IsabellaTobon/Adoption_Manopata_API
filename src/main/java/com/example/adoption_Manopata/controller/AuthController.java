@@ -61,6 +61,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody User user) {
+
         if (userService.existsByNickname(user.getNickname())) {
             return ResponseEntity.badRequest().body("Error: El nickname ya está en uso.");
         }
@@ -69,10 +70,10 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Error: El email ya está en uso.");
         }
 
-        // Encode password
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userService.save(user);
-        return ResponseEntity.ok("Usuario registrado exitosamente.");
+        // Delegate user creation to the service
+        userService.createUser(user);
+
+        return ResponseEntity.ok("Usuario registrado correctamente.");
     }
 
     @PostMapping("/forgot-password")

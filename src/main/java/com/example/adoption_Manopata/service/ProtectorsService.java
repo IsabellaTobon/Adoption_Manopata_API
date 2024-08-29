@@ -14,14 +14,22 @@ public class ProtectorsService {
     @Autowired
     private ProtectorsRepository protectorsRepository;
 
+    // Get all protectors
     public List<Protector> getAllProtectors() {
         return protectorsRepository.findAll();
     }
 
+    // Search protector by id
     public Optional<Protector> getProtectorById(Long id) {
         return protectorsRepository.findById(id);
     }
 
+    // Search protector by name
+    public Optional<Protector> getProtectorByName(String name) {
+        return protectorsRepository.findByName(name);
+    }
+
+    // Create a new protector
     public Protector createProtector(Protector protector) {
         if (protector.getPhoto() == null || protector.getPhoto().isEmpty()) {
             protector.setPhoto("/images/default-protector.jpg");
@@ -29,6 +37,7 @@ public class ProtectorsService {
         return protectorsRepository.save(protector);
     }
 
+    // Update a protector
     public Protector updateProtector(Long id, Protector protectorDetails) {
         return protectorsRepository.findById(id)
                 .map(protector -> {
@@ -39,7 +48,7 @@ public class ProtectorsService {
                     protector.setCity(protectorDetails.getCity());
                     protector.setProvince(protectorDetails.getProvince());
                     protector.setAddress(protectorDetails.getAddress());
-                    protector.setWebSite(protectorDetails.getWebSite());
+                    protector.setWeb_site(protectorDetails.getWeb_site());
                     if (protectorDetails.getPhoto() != null && !protectorDetails.getPhoto().isEmpty()) {
                         protector.setPhoto(protectorDetails.getPhoto());
                     }
@@ -47,6 +56,7 @@ public class ProtectorsService {
                 }).orElseThrow(() -> new RuntimeException("Protector not found"));
     }
 
+    // Delete a protector
     public void deleteProtector(Long id) {
         protectorsRepository.deleteById(id);
     }

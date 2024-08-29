@@ -46,10 +46,9 @@ public class Protector {
     @NotBlank(message = "La provincia es obligatoria")
     private String province;
 
-//    @NotBlank(message = "La dirección es obligatoria")
     private String address;
 
     @Size(max = 255)
-    private String webSite;
+    private String web_site;
 
 }
