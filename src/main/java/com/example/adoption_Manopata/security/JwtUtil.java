@@ -1,15 +1,16 @@
 package com.example.adoption_Manopata.security;
 
+import com.example.adoption_Manopata.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 
 import javax.crypto.SecretKey;
-import java.time.Instant;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Map;
@@ -38,14 +39,46 @@ public class JwtUtil {
                 .claims(claims)
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // Token expira en 10 horas
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // Token expires in 10 hours
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    // Method to generate a JWT token with email
+    public String generateTokenWithEmail(String email) {
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // Token válido por 1 hora
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    // Method to generate a JWT token for password reset
+    public String generatePasswordResetToken(User user) {
+        Map<String, Object> claims = Map.of("email", user.getEmail());
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject("password_reset")
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // Token expira en 1 hora
                 .signWith(getSigningKey())
                 .compact();
     }
 
     // Method to extract username from JWT token
-    public String extractUsername(String token) {
+    public String extractNickname(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    // Method to resolve the token from the request
+    public String resolveToken(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+        return null;
     }
 
     // Method to extract any type of claim from the JWT token
@@ -55,12 +88,18 @@ public class JwtUtil {
     }
 
     // Method to extract all claims from the JWT token
-    private Claims extractAllClaims(String token) {
+    public Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .setSigningKey(getSigningKey()) // Set the signing key
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    // Method to validate the JWT token
+    public boolean validateToken(String token, UserDetails userDetails) {
+        final String nickname = extractNickname(token);
+        return (nickname.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
     // Method to check if the token has expired
@@ -73,19 +112,6 @@ public class JwtUtil {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    // Method to validate the JWT token
-    public boolean validateToken(String token, UserDetails userDetails) {
-        final String nickname = extractUsername(token);
-        return (nickname.equals(userDetails.getUsername()) && !isTokenExpired(token));
-    }
-
     // Method to generate a JWT token with email
-    public String generateTokenWithEmail(String email) {
-        return Jwts.builder()
-                .setSubject(email)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // Token válido por 1 hora
-                .signWith(getSigningKey())
-                .compact();
-    }
+
 }

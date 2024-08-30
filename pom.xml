@@ -70,25 +70,25 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- Dependencies for validation of Bean Validation API -->
+		<!-- Dependencies validation of Bean Validation API -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 
-		<!-- Dependencies for Spring Security -->
+		<!-- Dependencies Spring Security -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 
-		<!-- BCrypt for password encoding -->
+		<!-- BCrypt password encoding -->
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-crypto</artifactId>
 		</dependency>
 
-		<!-- Dependencies para JWT -->
+		<!-- Dependencies JWT -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-jackson</artifactId>
@@ -109,7 +109,7 @@
 			<version>0.12.6</version>
 		</dependency>
 
-		<!-- Dependencies for sending emails -->
+		<!-- Dependencies sending emails -->
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

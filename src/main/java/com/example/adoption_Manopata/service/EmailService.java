@@ -18,4 +18,17 @@ public class EmailService {
         message.setText(text);
         mailSender.send(message);
     }
+
+    public void sendPasswordResetEmail(String to, String resetLink) {
+
+        String subject = "Restablecer tu contraseña";
+        String text = "Hola,\n\n" +
+                "Has solicitado restablecer tu contraseña. Haz clic en el siguiente enlace para cambiar tu contraseña:\n\n" +
+                resetLink + "\n\n" +
+                "Si no solicitaste esto, por favor ignora este correo.\n\n" +
+                "Saludos,\n" +
+                "El equipo de Adoption Manopata";
+
+        sendEmail(to, subject, text);
+    }
 }

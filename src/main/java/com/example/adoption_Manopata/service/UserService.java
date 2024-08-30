@@ -55,10 +55,12 @@ public class UserService {
         return userRepository.existsByEmailAndDeletedFalse(email);
     }
 
+    // Save user changes
     public void save(User user) {
         userRepository.save(user);
     }
 
+    // Update user data
     public User updateUser(Long id, User userDetails) {
         return userRepository.findById(id)
                 .map(user -> {
@@ -77,7 +79,7 @@ public class UserService {
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
 
-            // Verify if the old password matches whith the one stored
+            // Verify if the old password matches with the one stored
             if (passwordEncoder.matches(oldPassword, user.getPassword())) {
                 // If the old password matches, encode the new password and save it
                 user.setPassword(passwordEncoder.encode(newPassword));
@@ -90,6 +92,7 @@ public class UserService {
         return false;
     }
 
+    // Method to delete a user (mark as deleted)
     public boolean deleteUser(Long userId, String password) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isPresent()) {
@@ -108,6 +111,7 @@ public class UserService {
         }
     }
 
+    // Deactivate user
     public void deactivateUser(Long id) {
         userRepository.findById(id).ifPresent(user -> {
             user.setActive(false);
