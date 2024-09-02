@@ -3,13 +3,19 @@ package com.example.adoption_Manopata.controller;
 import com.example.adoption_Manopata.dto.AuthRequest;
 import com.example.adoption_Manopata.dto.ChangePasswordRequest;
 import com.example.adoption_Manopata.dto.ForgotPasswordRequest;
+import com.example.adoption_Manopata.dto.ResetPasswordRequest;
 import com.example.adoption_Manopata.model.User;
 import com.example.adoption_Manopata.security.JwtUtil;
 import com.example.adoption_Manopata.service.EmailService;
 import com.example.adoption_Manopata.service.UserService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -44,19 +50,17 @@ public class AuthController {
 
     @PostMapping("/login")
     public String createAuthenticationToken(@RequestBody AuthRequest authRequest) throws Exception {
-        // Authentication
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(authRequest.getNickname(), authRequest.getPassword())
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(authRequest.getNickname(), authRequest.getPassword())
+            );
+        } catch (BadCredentialsException e) {
+            throw new Exception("Incorrect username or password", e);
+        }
 
-        // Load user details
         final UserDetails userDetails = userDetailsService.loadUserByUsername(authRequest.getNickname());
 
-
-        // Generate the JWT token using the user details
-        final String jwt = jwtUtil.generateToken(userDetails);
-
-        return jwt;
+        return jwtUtil.generateToken(userDetails);
     }
 
     @PostMapping("/register")
@@ -84,7 +88,6 @@ public class AuthController {
         String token = jwtUtil.generateTokenWithEmail(user.getEmail());
         String resetLink = "http://localhost:4200/reset-password?token=" + token;
 
-        // Enviar email con el enlace de restablecimiento de contraseña
         emailService.sendEmail(user.getEmail(), "Restablecimiento de Contraseña",
                 "Haz clic en el siguiente enlace para restablecer tu contraseña: " + resetLink);
 
@@ -93,21 +96,57 @@ public class AuthController {
 
     @PostMapping("/change-password")
     public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
-        // Search the user by nickname
         User user = userService.findByNickname(changePasswordRequest.getNickname())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        // Try to change the password
-        try {
-            boolean isPasswordChanged = userService.changePassword(user.getId(), changePasswordRequest.getOldPassword(), changePasswordRequest.getNewPassword());
+        boolean isPasswordChanged = userService.changePassword(user.getId(), changePasswordRequest.getOldPassword(), changePasswordRequest.getNewPassword());
 
-            if (isPasswordChanged) {
-                return ResponseEntity.ok("Contraseña actualizada exitosamente.");
+        if (isPasswordChanged) {
+            return ResponseEntity.ok("Contraseña actualizada exitosamente.");
+        } else {
+            return ResponseEntity.badRequest().body("Error al cambiar la contraseña.");
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
+        String token = resetPasswordRequest.getToken();
+
+        try {
+            Claims claims = jwtUtil.extractAllClaims(token);
+            if ("password_reset".equals(claims.getSubject())) {
+                String email = claims.get("email", String.class);
+                User user = userService.findByEmail(email)
+                        .orElseThrow(() -> new RuntimeException("Usuario no encontrado."));
+
+                user.setPassword(passwordEncoder.encode(resetPasswordRequest.getNewPassword()));
+                userService.save(user);
+
+                return ResponseEntity.ok("Contraseña restablecida correctamente.");
             } else {
-                return ResponseEntity.badRequest().body("Error al cambiar la contraseña.");
+                return ResponseEntity.badRequest().body("Token de restablecimiento de contraseña no válido.");
             }
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (JwtException e) {
+            return ResponseEntity.badRequest().body("Token de restablecimiento de contraseña no válido o expirado.");
+        }
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<String> refreshToken(HttpServletRequest request) {
+        String token = jwtUtil.resolveToken(request);
+
+        if (token != null) {
+            String nickname = jwtUtil.extractNickname(token);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(nickname);
+
+            if (jwtUtil.validateToken(token, userDetails)) {
+                String newToken = jwtUtil.generateToken(userDetails);
+                return ResponseEntity.ok(newToken);
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido.");
+            }
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido o expirado.");
         }
     }
 

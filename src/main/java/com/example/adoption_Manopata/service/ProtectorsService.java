@@ -47,7 +47,6 @@ public class ProtectorsService {
                     protector.setEmail(protectorDetails.getEmail());
                     protector.setCity(protectorDetails.getCity());
                     protector.setProvince(protectorDetails.getProvince());
-                    protector.setAddress(protectorDetails.getAddress());
                     protector.setWeb_site(protectorDetails.getWeb_site());
                     if (protectorDetails.getPhoto() != null && !protectorDetails.getPhoto().isEmpty()) {
                         protector.setPhoto(protectorDetails.getPhoto());

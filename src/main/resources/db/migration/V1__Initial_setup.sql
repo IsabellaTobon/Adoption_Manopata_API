@@ -18,6 +18,21 @@ CREATE TABLE IF NOT EXISTS users (
     FOREIGN KEY (role) REFERENCES roles(name)
 );
 
+-- Create protectors table if doesn't exist
+CREATE TABLE IF NOT EXISTS protectors (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    name VARCHAR(50) NOT NULL,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    phone VARCHAR(13) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    city VARCHAR(50) NOT NULL,
+    province VARCHAR(50),
+    photo VARCHAR(255),
+    web_site VARCHAR(255)
+);
+
 -- Create posts table if doesn't exist
 CREATE TABLE IF NOT EXISTS posts (
     id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,
@@ -34,8 +49,10 @@ CREATE TABLE IF NOT EXISTS posts (
     available BOOLEAN,
     likes INT DEFAULT 0,
     userId BIGINT NOT NULL,
+    protector_id BIGINT NOT NULL,
     description TEXT NOT NULL,
-    FOREIGN KEY (userId) REFERENCES users(id)
+    FOREIGN KEY (userId) REFERENCES users(id),
+    FOREIGN KEY (protector_id) REFERENCES protectors(id)
 );
 
 -- Create messages table if doesn't exist
@@ -51,11 +68,3 @@ CREATE TABLE IF NOT EXISTS messages (
     FOREIGN KEY (postId) REFERENCES posts(id)
 );
 
--- Create protectors table if doesn't exist
-CREATE TABLE IF NOT EXISTS protectors (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    name VARCHAR(50) NOT NULL,
-    description TEXT NOT NULL,
-    phone VARCHAR(13) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE
-);

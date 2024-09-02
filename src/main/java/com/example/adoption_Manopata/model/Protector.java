@@ -1,9 +1,6 @@
 package com.example.adoption_Manopata.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -19,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class Protector {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Size(max = 255)
@@ -28,6 +25,13 @@ public class Protector {
     @NotBlank(message = "El nombre es obligatorio")
     @Size(max = 100, message = "El nombre no debe exceder los 100 caracteres")
     private String name;
+
+    @NotBlank(message = "El nombre de usuario es obligatorio ")
+    @Size(max = 100, message = "El nombre no debe exceder los 100 caracteres")
+    private String username;
+
+    @NotBlank(message = "La contraseña es obligatoria")
+    private String password;
 
     @NotBlank(message = "La descripción es obligatoria")
     private String description;
@@ -45,8 +49,6 @@ public class Protector {
 
     @NotBlank(message = "La provincia es obligatoria")
     private String province;
-
-    private String address;
 
     @Size(max = 255)
     private String web_site;
