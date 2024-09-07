@@ -54,11 +54,17 @@ public class UserController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/check-nickname")
-    public ResponseEntity<Boolean> checkNicknameAvailability(@RequestBody Map<String, String> request) {
-        String nickname = request.get("nickname");
+    @GetMapping("/check-nickname")
+    public ResponseEntity<Boolean> checkNicknameAvailability(@RequestParam String nickname) {
         boolean exists = userService.existsByNickname(nickname);
         return ResponseEntity.ok(!exists);
+    }
+
+    // Verificar disponibilidad de email
+    @GetMapping("/check-email")
+    public ResponseEntity<Boolean> checkEmailAvailability(@RequestParam String email) {
+        boolean isAvailable = userService.isEmailAvailable(email);
+        return new ResponseEntity<>(isAvailable, HttpStatus.OK);
     }
 
     @PutMapping("/{id}")

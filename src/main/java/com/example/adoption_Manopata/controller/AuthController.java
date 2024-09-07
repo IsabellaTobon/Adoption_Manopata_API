@@ -4,6 +4,7 @@ import com.example.adoption_Manopata.dto.AuthRequest;
 import com.example.adoption_Manopata.dto.ChangePasswordRequest;
 import com.example.adoption_Manopata.dto.ForgotPasswordRequest;
 import com.example.adoption_Manopata.dto.ResetPasswordRequest;
+import com.example.adoption_Manopata.model.Role;
 import com.example.adoption_Manopata.model.User;
 import com.example.adoption_Manopata.security.JwtUtil;
 import com.example.adoption_Manopata.service.EmailService;
@@ -66,19 +67,18 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody User user) {
 
-        if (userService.existsByNickname(user.getNickname())) {
-            return ResponseEntity.badRequest().body("Error: El nickname ya está en uso.");
+        try {
+            // Delegate user creation to the service, which handles the role and validation
+            userService.createUser(user);
+            // Return answer
+            return ResponseEntity.ok("Usuario registrado correctamente.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());  // Retorna cualquier error de validación
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ocurrió un error: " + e.getMessage());
         }
-
-        if (userService.existsByEmail(user.getEmail())) {
-            return ResponseEntity.badRequest().body("Error: El email ya está en uso.");
-        }
-
-        // Delegate user creation to the service
-        userService.createUser(user);
-
-        return ResponseEntity.ok("Usuario registrado correctamente.");
     }
+
 
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest) {

@@ -2,6 +2,7 @@ package com.example.adoption_Manopata.service;
 
 import com.example.adoption_Manopata.model.Role;
 import com.example.adoption_Manopata.model.User;
+import com.example.adoption_Manopata.repository.RoleRepository;
 import com.example.adoption_Manopata.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,6 +15,9 @@ import java.util.Optional;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -34,17 +38,34 @@ public class UserService {
         return userRepository.findByNicknameAndDeletedFalse(nickname);
     }
 
-    public User createUser(User user) {
-
-        // Checks if role is null or empty, and sets "USER" by default
-        if (user.getRole() == null || user.getRole().getName().isEmpty()) {
-            user.setRole(new Role("USER"));
+    public void createUser(User user) {
+        // Verificar si el apellido está vacío
+        if (user.getLastname() == null || user.getLastname().isEmpty()) {
+            throw new IllegalArgumentException("El apellido es obligatorio.");
         }
 
-        // Encode the password before saving it
+        // Verificar si el nickname ya está en uso
+        if (existsByNickname(user.getNickname())) {
+            throw new IllegalArgumentException("Error: El nickname ya está en uso.");
+        }
+
+        // Verificar si el email ya está en uso
+        if (existsByEmail(user.getEmail())) {
+            throw new IllegalArgumentException("Error: El email ya está en uso.");
+        }
+
+        // Asignar el rol "USER" si no está asignado
+        Role userRole = roleRepository.findByName("USER");
+        if (userRole == null) {
+            throw new RuntimeException("Role 'USER' not found");
+        }
+        user.setRole(userRole);
+
+        // Codificar la contraseña antes de guardar
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        return userRepository.save(user);
+        // Guardar el usuario en la base de datos (sin devolver nada)
+        userRepository.save(user);
     }
 
     public boolean existsByNickname(String nickname) {
@@ -53,6 +74,10 @@ public class UserService {
 
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmailAndDeletedFalse(email);
+    }
+
+    public boolean isEmailAvailable(String email) {
+        return !userRepository.existsByEmailAndDeletedFalse(email);
     }
 
     // Save user changes
