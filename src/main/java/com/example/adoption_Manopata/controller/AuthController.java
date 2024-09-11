@@ -26,6 +26,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 @RestController
 @RequestMapping("/auth")
@@ -50,32 +53,53 @@ public class AuthController {
     private EmailService emailService;
 
     @PostMapping("/login")
-    public String createAuthenticationToken(@RequestBody AuthRequest authRequest) throws Exception {
+    public ResponseEntity<Map<String, String>> createAuthenticationToken(@RequestBody AuthRequest authRequest) throws Exception {
         try {
+            // Autenticar las credenciales
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authRequest.getNickname(), authRequest.getPassword())
             );
         } catch (BadCredentialsException e) {
-            throw new Exception("Incorrect username or password", e);
+            // Si las credenciales son incorrectas, devolver un error en formato JSON
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Incorrect username or password");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
         }
 
+        // Cargar detalles del usuario y generar el token JWT
         final UserDetails userDetails = userDetailsService.loadUserByUsername(authRequest.getNickname());
+        final String jwt = jwtUtil.generateToken(userDetails);
 
-        return jwtUtil.generateToken(userDetails);
+        // Crear una respuesta JSON con el token
+        Map<String, String> response = new HashMap<>();
+        response.put("token", jwt);
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody User user) {
+    public ResponseEntity<Map<String, String>> registerUser(@RequestBody User user) {
 
         try {
             // Delegate user creation to the service, which handles the role and validation
             userService.createUser(user);
-            // Return answer
-            return ResponseEntity.ok("Usuario registrado correctamente.");
+
+            // Create a response map with a message
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Usuario registrado correctamente.");
+
+            // Return the response as JSON
+            return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());  // Retorna cualquier error de validación
+            // Return validation error in JSON format
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ocurrió un error: " + e.getMessage());
+            // Return general error in JSON format
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Ocurrió un error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 
