@@ -105,7 +105,7 @@ public class AuthController {
 
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest) {
+    public ResponseEntity<Map<String, String>> forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest) {
         User user = userService.findByEmail(forgotPasswordRequest.getEmail())
                 .orElseThrow(() -> new RuntimeException("Error: Email no registrado."));
 
@@ -115,25 +115,30 @@ public class AuthController {
         emailService.sendEmail(user.getEmail(), "Restablecimiento de Contraseña",
                 "Haz clic en el siguiente enlace para restablecer tu contraseña: " + resetLink);
 
-        return ResponseEntity.ok("Se ha enviado un enlace de restablecimiento de contraseña a tu email.");
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Se ha enviado un enlace de restablecimiento de contraseña a tu email.");
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/change-password")
-    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
+    public ResponseEntity<Map<String, String>> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
         User user = userService.findByNickname(changePasswordRequest.getNickname())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         boolean isPasswordChanged = userService.changePassword(user.getId(), changePasswordRequest.getOldPassword(), changePasswordRequest.getNewPassword());
 
+        Map<String, String> response = new HashMap<>();
         if (isPasswordChanged) {
-            return ResponseEntity.ok("Contraseña actualizada exitosamente.");
+            response.put("message", "Contraseña actualizada exitosamente.");
+            return ResponseEntity.ok(response);
         } else {
-            return ResponseEntity.badRequest().body("Error al cambiar la contraseña.");
+            response.put("message", "Error al cambiar la contraseña.");
+            return ResponseEntity.badRequest().body(response);
         }
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
+    public ResponseEntity<Map<String, String>> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
         String token = resetPasswordRequest.getToken();
 
         try {
@@ -146,17 +151,19 @@ public class AuthController {
                 user.setPassword(passwordEncoder.encode(resetPasswordRequest.getNewPassword()));
                 userService.save(user);
 
-                return ResponseEntity.ok("Contraseña restablecida correctamente.");
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "Contraseña restablecida correctamente.");
+                return ResponseEntity.ok(response);
             } else {
-                return ResponseEntity.badRequest().body("Token de restablecimiento de contraseña no válido.");
+                return ResponseEntity.badRequest().body(Map.of("message", "Token de restablecimiento de contraseña no válido."));
             }
         } catch (JwtException e) {
-            return ResponseEntity.badRequest().body("Token de restablecimiento de contraseña no válido o expirado.");
+            return ResponseEntity.badRequest().body(Map.of("message", "Token de restablecimiento de contraseña no válido o expirado."));
         }
     }
 
     @PostMapping("/refresh-token")
-    public ResponseEntity<String> refreshToken(HttpServletRequest request) {
+    public ResponseEntity<Map<String, String>> refreshToken(HttpServletRequest request) {
         String token = jwtUtil.resolveToken(request);
 
         if (token != null) {
@@ -165,13 +172,12 @@ public class AuthController {
 
             if (jwtUtil.validateToken(token, userDetails)) {
                 String newToken = jwtUtil.generateToken(userDetails);
-                return ResponseEntity.ok(newToken);
+                return ResponseEntity.ok(Map.of("token", newToken));
             } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Token inválido."));
             }
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido o expirado.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Token inválido o expirado."));
         }
     }
-
 }
