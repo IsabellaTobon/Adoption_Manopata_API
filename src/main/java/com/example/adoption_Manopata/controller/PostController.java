@@ -1,13 +1,18 @@
 package com.example.adoption_Manopata.controller;
 
 import com.example.adoption_Manopata.model.Post;
+import com.example.adoption_Manopata.service.FileStorageService;
 import com.example.adoption_Manopata.service.PostService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.Date;
 import java.util.Optional;
 
 @RestController
@@ -16,6 +21,9 @@ public class PostController {
 
     @Autowired
     private PostService postService;
+
+    @Autowired
+    private FileStorageService fileStorageService;
 
     // Obtain all posts with filters
     @GetMapping
@@ -41,9 +49,34 @@ public class PostController {
     }
 
     // Create a new post
-    @PostMapping
-    public Post createPost(@RequestBody Post post) {
-        return postService.createPost(post);
+    @PostMapping("/create")
+    public ResponseEntity<?> createPost(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("post") String postJson) {
+        try {
+            // Validar si la imagen está presente
+            if (file.isEmpty()) {
+                return ResponseEntity.badRequest().body("La imagen es obligatoria");
+            }
+
+            // Convertir el JSON del post a un objeto Post usando ObjectMapper
+            ObjectMapper objectMapper = new ObjectMapper();
+            Post post = objectMapper.readValue(postJson, Post.class);
+
+            // Guardar la imagen
+            String fileName = fileStorageService.storeFile(file);
+
+            // Configurar la ruta de la imagen
+            post.setPhoto("/uploads/" + fileName);
+            post.setRegisterDate(new Date());
+
+            // Guardar el post en la base de datos
+            postService.createPost(post);
+
+            return ResponseEntity.ok("Post creado exitosamente");
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body("Error al subir la imagen: " + e.getMessage());
+        }
     }
 
     // Update a post

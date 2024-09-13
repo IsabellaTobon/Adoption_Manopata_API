@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS posts (
     available BOOLEAN,
     likes INT DEFAULT 0,
     userId BIGINT NOT NULL,
-    protector_id BIGINT NOT NULL,
+    protector_id BIGINT NULL,
     description TEXT NOT NULL,
     FOREIGN KEY (userId) REFERENCES users(id),
     FOREIGN KEY (protector_id) REFERENCES protectors(id)

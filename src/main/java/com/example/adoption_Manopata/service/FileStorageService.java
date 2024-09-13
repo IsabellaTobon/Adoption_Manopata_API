@@ -18,8 +18,10 @@ public class FileStorageService {
         // Generate a unique file name
         String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
 
-        // Create the directory if it doesn't exist
+        // Get the upload directory path
         Path uploadPath = Paths.get(uploadDir);
+
+        // Create the directory if it doesn't exist
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }

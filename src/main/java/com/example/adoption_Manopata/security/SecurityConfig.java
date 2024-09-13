@@ -37,19 +37,20 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/protectors").permitAll()
                         .requestMatchers("/protectors/**").authenticated()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")  // Only admins can acces
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")  // Solo los admins pueden acceder
                         .requestMatchers("/api/user/forgot-password").permitAll()
                         .requestMatchers("/api/user/reset-password").permitAll()
+                        .requestMatchers("/api/files/upload").authenticated()  // Solo autenticados pueden subir archivos
+                        .requestMatchers("/api/post/create").authenticated()  // Solo autenticados pueden crear posts
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 );
 
-        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
         // Solo habilitar el filtro JWT para rutas autenticadas
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
