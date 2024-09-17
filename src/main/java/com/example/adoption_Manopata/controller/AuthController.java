@@ -4,7 +4,6 @@ import com.example.adoption_Manopata.dto.AuthRequest;
 import com.example.adoption_Manopata.dto.ChangePasswordRequest;
 import com.example.adoption_Manopata.dto.ForgotPasswordRequest;
 import com.example.adoption_Manopata.dto.ResetPasswordRequest;
-import com.example.adoption_Manopata.model.Role;
 import com.example.adoption_Manopata.model.User;
 import com.example.adoption_Manopata.security.JwtUtil;
 import com.example.adoption_Manopata.service.EmailService;
@@ -16,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -70,9 +70,16 @@ public class AuthController {
         final UserDetails userDetails = userDetailsService.loadUserByUsername(authRequest.getNickname());
         final String jwt = jwtUtil.generateToken(userDetails);
 
+        // Obtener el rol del usuario desde UserDetails
+        String role = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .findFirst()
+                .orElse("USER");  // Por defecto, asignamos el rol 'USER'
+
         // Crear una respuesta JSON con el token
         Map<String, String> response = new HashMap<>();
         response.put("token", jwt);
+        response.put("role", role);
 
         return ResponseEntity.ok(response);
     }
@@ -103,7 +110,7 @@ public class AuthController {
         }
     }
 
-
+    // RECUPERACIÓN DE CONTRASEÑA
     @PostMapping("/forgot-password")
     public ResponseEntity<Map<String, String>> forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest) {
         User user = userService.findByEmail(forgotPasswordRequest.getEmail())
@@ -120,6 +127,7 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    // CAMBIO DE CONTRASEÑA
     @PostMapping("/change-password")
     public ResponseEntity<Map<String, String>> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
         User user = userService.findByNickname(changePasswordRequest.getNickname())
@@ -137,6 +145,7 @@ public class AuthController {
         }
     }
 
+    // RESTABLECIMIENTO DE CONTRASEÑA
     @PostMapping("/reset-password")
     public ResponseEntity<Map<String, String>> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
         String token = resetPasswordRequest.getToken();
@@ -162,6 +171,7 @@ public class AuthController {
         }
     }
 
+    // REFRESCAR TOKEN
     @PostMapping("/refresh-token")
     public ResponseEntity<Map<String, String>> refreshToken(HttpServletRequest request) {
         String token = jwtUtil.resolveToken(request);

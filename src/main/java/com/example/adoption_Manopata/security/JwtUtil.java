@@ -112,6 +112,4 @@ public class JwtUtil {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    // Method to generate a JWT token with email
-
 }

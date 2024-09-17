@@ -37,7 +37,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/protectors").permitAll()
                         .requestMatchers("/protectors/**").authenticated()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")  // Solo los admins pueden acceder
+                        .requestMatchers("/api/admin/**").hasAuthority("ADMIN")  // Solo los admins pueden acceder
                         .requestMatchers("/api/user/forgot-password").permitAll()
                         .requestMatchers("/api/user/reset-password").permitAll()
                         .requestMatchers("/api/files/upload").authenticated()  // Solo autenticados pueden subir archivos
