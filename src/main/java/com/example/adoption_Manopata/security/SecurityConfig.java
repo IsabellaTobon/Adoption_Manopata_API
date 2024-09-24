@@ -34,15 +34,14 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/protectors").permitAll()
-                        .requestMatchers("/protectors/**").authenticated()
-                        .requestMatchers("/api/admin/**").hasAuthority("ADMIN")  // Solo los admins pueden acceder
-                        .requestMatchers("/api/user/forgot-password").permitAll()
-                        .requestMatchers("/api/user/reset-password").permitAll()
-                        .requestMatchers("/api/files/upload").authenticated()  // Solo autenticados pueden subir archivos
-                        .requestMatchers("/api/post/create").authenticated()  // Solo autenticados pueden crear posts
-                        .anyRequest().authenticated()
+                        // Permitir acceso público a las rutas de posts y datos de provincias, ciudades y razas
+                        .requestMatchers("/api/post", "/api/post/**").permitAll()  // Todos pueden ver posts
+                        .requestMatchers("/api/post/provinces", "/api/post/cities", "/api/post/breeds").permitAll()  // Provincias, ciudades y razas públicas
+                        .requestMatchers("/auth/**").permitAll()  // Acceso público a la autenticación
+                        // Rutas que requieren autenticación
+                        .requestMatchers("/api/post/create", "/api/post/**/update", "/api/post/**/delete").authenticated()
+                        .requestMatchers("/api/admin/**").hasAuthority("ADMIN")  // Solo admin puede acceder a rutas admin
+                        .anyRequest().authenticated()  // Cualquier otra ruta requiere autenticación
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
