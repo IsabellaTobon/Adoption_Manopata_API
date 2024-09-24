@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -106,6 +107,27 @@ public class PostController {
         } catch (IOException e) {
             return ResponseEntity.status(500).body("Error al subir la imagen: " + e.getMessage());
         }
+    }
+
+    // Obtener todas las provincias
+    @GetMapping("/provinces")
+    public ResponseEntity<List<String>> getProvinces() {
+        List<String> provinces = postService.getAllProvinces();
+        return ResponseEntity.ok(provinces);
+    }
+
+    // Obtener ciudades según la provincia
+    @GetMapping("/cities")
+    public ResponseEntity<List<String>> getCities(@RequestParam String province) {
+        List<String> cities = postService.getCitiesByProvince(province);
+        return ResponseEntity.ok(cities);
+    }
+
+    // Obtener razas según el tipo de animal
+    @GetMapping("/breeds")
+    public ResponseEntity<List<String>> getBreeds(@RequestParam String animalType) {
+        List<String> breeds = postService.getBreedsByAnimalType(animalType);
+        return ResponseEntity.ok(breeds);
     }
 
     // Update a post

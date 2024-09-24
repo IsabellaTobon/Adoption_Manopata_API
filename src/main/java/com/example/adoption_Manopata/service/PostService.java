@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -48,6 +49,22 @@ public class PostService {
         }
         return postRepository.save(post);
     }
+
+    // Obtener todas las provincias desde la tabla de posts
+    public List<String> getAllProvinces() {
+        return postRepository.findAllProvinces();
+    }
+
+    // Obtener las ciudades según la provincia desde la tabla de posts
+    public List<String> getCitiesByProvince(String province) {
+        return postRepository.findCitiesByProvince(province);
+    }
+
+    // Obtener las razas según el tipo de animal desde la tabla de posts
+    public List<String> getBreedsByAnimalType(String animalType) {
+        return postRepository.findBreedsByAnimalType(animalType);
+    }
+
 
     // Update a post
     public Post updatePost(Long id, Post postDetails) {
