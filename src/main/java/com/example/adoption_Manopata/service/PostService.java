@@ -43,11 +43,11 @@ public class PostService {
     }
 
     // Create a new post
-    public Post createPost(Post post) {
+    public void createPost(Post post) {
         if (post.getPhoto() == null || post.getPhoto().isEmpty()) {
             throw new IllegalArgumentException("La imagen es obligatoria para crear un post.");
         }
-        return postRepository.save(post);
+        postRepository.save(post);
     }
 
     // Obtener todas las provincias desde la tabla de posts
@@ -107,12 +107,17 @@ public class PostService {
     }
 
     // Increase likes of a post
-    public Post incrementLikes(Long id) {
-        return postRepository.findById(id)
-                .map(post -> {
-                    post.setLikes(post.getLikes() + 1);
-                    return postRepository.save(post);
-                }).orElseThrow(() -> new RuntimeException("Post not found"));
+    public Post incrementLikes(Long postId) {
+        Optional<Post> optionalPost = postRepository.findById(postId);
+
+        if (optionalPost.isPresent()) {
+            Post post = optionalPost.get();
+            post.setLikes(post.getLikes() + 1);
+            postRepository.save(post);
+            return post;
+        } else {
+            return null;
+        }
     }
 
     // Obtain all posts by user id

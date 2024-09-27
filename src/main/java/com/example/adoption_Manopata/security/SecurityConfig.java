@@ -38,6 +38,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/post", "/api/post/**").permitAll()  // Todos pueden ver posts
                         .requestMatchers("/api/post/provinces", "/api/post/cities", "/api/post/breeds").permitAll()  // Provincias, ciudades y razas públicas
                         .requestMatchers("/auth/**").permitAll()  // Acceso público a la autenticación
+                        .requestMatchers("/uploads/**").permitAll()  // <<< Permitir acceso público a las imágenes
                         // Rutas que requieren autenticación
                         .requestMatchers("/api/post/create", "/api/post/**/update", "/api/post/**/delete").authenticated()
                         .requestMatchers("/api/admin/**").hasAuthority("ADMIN")  // Solo admin puede acceder a rutas admin

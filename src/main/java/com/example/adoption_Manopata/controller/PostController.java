@@ -2,6 +2,7 @@ package com.example.adoption_Manopata.controller;
 
 import com.example.adoption_Manopata.model.Post;
 import com.example.adoption_Manopata.model.User;
+import com.example.adoption_Manopata.repository.PostRepository;
 import com.example.adoption_Manopata.service.FileStorageService;
 import com.example.adoption_Manopata.service.PostService;
 import com.example.adoption_Manopata.service.UserService;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -29,6 +31,9 @@ public class PostController {
 
     @Autowired
     private PostService postService;
+
+    @Autowired
+    private PostRepository postRepository;
 
     @Autowired
     private UserService userService;
@@ -109,6 +114,41 @@ public class PostController {
         }
     }
 
+    // Incrementar likes de un post
+    @PostMapping("/{id}/like")
+    public ResponseEntity<?> likePost(@PathVariable Long id, Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no autenticado");
+        }
+
+        String nickname = principal.getName();  // Usamos el nombre de usuario autenticado (nickname)
+        Optional<User> userOpt = userService.findByNickname(nickname);
+        if (!userOpt.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
+        }
+        User user = userOpt.get();
+
+        Optional<Post> postOpt = postService.getPostById(id);
+        if (!postOpt.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Post no encontrado");
+        }
+        Post post = postOpt.get();
+
+        // Verificar si el usuario ya dio like
+        if (post.getLikedByUsers().contains(user)) {
+            // Si ya dio like, lo quitamos y reducimos los likes
+            post.getLikedByUsers().remove(user);
+            post.setLikes(post.getLikes() - 1);
+        } else {
+            // Si no ha dado like, lo añadimos y aumentamos los likes
+            post.getLikedByUsers().add(user);
+            post.setLikes(post.getLikes() + 1);
+        }
+
+        postRepository.save(post);  // Guardar los cambios usando el repositorio directamente
+        return ResponseEntity.ok(Collections.singletonMap("likes", post.getLikes()));
+    }
+
     // Obtener todas las provincias
     @GetMapping("/provinces")
     public ResponseEntity<List<String>> getProvinces() {
@@ -142,13 +182,6 @@ public class PostController {
     public ResponseEntity<Void> deletePost(@PathVariable Long id) {
         postService.deletePost(id);
         return ResponseEntity.ok().build();
-    }
-
-    // Increment likes of a post
-    @PostMapping("/{id}/like")
-    public ResponseEntity<Post> likePost(@PathVariable Long id) {
-        Post post = postService.incrementLikes(id);
-        return ResponseEntity.ok(post);
     }
 
     // Obtain posts by user id

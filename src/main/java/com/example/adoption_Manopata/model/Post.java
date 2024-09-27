@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Data
@@ -45,10 +47,14 @@ public class Post {
 
     private Boolean available;
 
-    private Integer likes = 0;
+    @ManyToMany
+    private Set<User> likedByUsers = new HashSet<>();
 
     @Column(length = 500)
     private String description;
+
+    @Column(nullable = false)
+    private int likes = 0;
 
     @ManyToOne
     @JoinColumn(name = "userId", nullable = false)
