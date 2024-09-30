@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -27,7 +28,7 @@ public class CommentsController {
     public ResponseEntity<?> createComment(@RequestBody Comment comment, Principal principal) {
         // Verificar que el usuario está autenticado
         if (principal == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no autenticado");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Usuario no autenticado"));
         }
 
         // Obtener el nickname del usuario autenticado desde el JWT
@@ -35,14 +36,14 @@ public class CommentsController {
         Optional<User> userOpt = userService.findByNickname(nickname);
 
         if (!userOpt.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Usuario no encontrado"));
         }
 
         User user = userOpt.get();
 
         // Verificar si el usuario ya ha hecho un comentario
         if (commentService.existsByUser(user)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El usuario ya ha hecho un comentario");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "El usuario ya ha hecho un comentario"));
         }
 
         // Asignar el nombre y el usuario al comentario
@@ -50,9 +51,10 @@ public class CommentsController {
         comment.setUser(user);
 
         // Guardar el comentario
-        commentService.saveComment(comment);
+        Comment savedComment = commentService.saveComment(comment);
 
-        return ResponseEntity.ok("Comentario creado exitosamente");
+        // Devolver una respuesta JSON con el mensaje y el comentario guardado
+        return ResponseEntity.ok(Map.of("message", "Comentario creado exitosamente", "comment", savedComment));
     }
 
     @GetMapping
