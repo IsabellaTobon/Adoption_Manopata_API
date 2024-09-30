@@ -68,3 +68,13 @@ CREATE TABLE IF NOT EXISTS messages (
     FOREIGN KEY (postId) REFERENCES posts(id)
 );
 
+-- Create comments table if doesn't exist
+CREATE TABLE IF NOT EXISTS comments (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    name VARCHAR(50) NOT NULL,
+    text TEXT NOT NULL,
+    rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    userId BIGINT NOT NULL,
+    FOREIGN KEY (userId) REFERENCES users(id)
+);
+

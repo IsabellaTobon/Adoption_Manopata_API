@@ -21,7 +21,7 @@ public class MyUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String nickname) throws UsernameNotFoundException {
         // Search user by nickname on database
         User user = userRepository.findByNickname(nickname)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + nickname));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with nickname: " + nickname));
 
         // Create an authority based on the user's role
         SimpleGrantedAuthority authority = new SimpleGrantedAuthority(user.getRole().getName());
