@@ -48,6 +48,11 @@ public class Post {
     private Boolean available;
 
     @ManyToMany
+    @JoinTable(
+            name = "posts_likedByUsers",  // Nombre de la tabla de unión
+            joinColumns = @JoinColumn(name = "post_id"),  // Columna que hace referencia a Post
+            inverseJoinColumns = @JoinColumn(name = "user_id")  // Columna que hace referencia a User
+    )
     private Set<User> likedByUsers = new HashSet<>();
 
     @Column(length = 500)

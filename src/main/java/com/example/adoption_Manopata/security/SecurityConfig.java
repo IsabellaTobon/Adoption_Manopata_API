@@ -39,6 +39,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/post/provinces", "/api/post/cities", "/api/post/breeds").permitAll()  // Provincias, ciudades y razas públicas
                         .requestMatchers("/auth/**").permitAll()  // Acceso público a la autenticación
                         .requestMatchers("/uploads/**").permitAll()  // Permitir acceso público a las imágenes
+                        .requestMatchers("/images/**").permitAll()  // Permitir acceso a imágenes
 
                         // Seguridad para los comentarios
                         .requestMatchers("/api/comments").permitAll()  // Permitir obtener comentarios (GET)
