@@ -71,6 +71,12 @@ public class PostController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/by-ids")
+    public ResponseEntity<List<Post>> getPostsByIds(@RequestParam List<Long> ids) {
+        List<Post> posts = postService.getPostsByIds(ids);
+        return ResponseEntity.ok(posts);
+    }
+
     // Create a new post
     @PostMapping("/create")
     public ResponseEntity<?> createPost(

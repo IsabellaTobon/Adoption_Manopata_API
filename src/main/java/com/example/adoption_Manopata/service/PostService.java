@@ -42,6 +42,10 @@ public class PostService {
         return postRepository.findById(id);
     }
 
+    public List<Post> getPostsByIds(List<Long> ids) {
+        return postRepository.findAllById(ids);
+    }
+    
     // Create a new post
     public void createPost(Post post) {
         if (post.getPhoto() == null || post.getPhoto().isEmpty()) {
