@@ -40,6 +40,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()  // Acceso público a la autenticación
                         .requestMatchers("/uploads/**").permitAll()  // Permitir acceso público a las imágenes
                         .requestMatchers("/images/**").permitAll()  // Permitir acceso a imágenes
+                        .requestMatchers("/protectors/**").permitAll()
 
                         // Seguridad para los comentarios
                         .requestMatchers("/api/comments").permitAll()  // Permitir obtener comentarios (GET)

@@ -21,8 +21,22 @@ public class ProtectorsController {
 
     // Obtain all protectors
     @GetMapping
-    public List<Protector> getAllProtectors() {
-        return protectorsService.getAllProtectors();
+    public ResponseEntity<List<Protector>> getAllProtectors() {
+        List<Protector> protectors = protectorsService.getAllProtectors();
+        return ResponseEntity.ok(protectors);
+    }
+    // Obtener provincias
+    @GetMapping("/provinces")
+    public ResponseEntity<List<String>> getAllProvinces() {
+        List<String> provinces = protectorsService.getAllProvinces();
+        return ResponseEntity.ok(provinces);
+    }
+
+    // Obtener ciudades por provincia
+    @GetMapping("/cities")
+    public ResponseEntity<List<String>> getCities(@RequestParam String province) {
+        List<String> cities = protectorsService.getCitiesByProvince(province);
+        return ResponseEntity.ok(cities);
     }
 
     // Obtain protector by id

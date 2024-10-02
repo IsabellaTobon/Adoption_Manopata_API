@@ -19,6 +19,16 @@ public class ProtectorsService {
         return protectorsRepository.findAll();
     }
 
+    // Obtener todas las provincias
+    public List<String> getAllProvinces() {
+        return protectorsRepository.findAllProvinces();
+    }
+
+    // Obtener ciudades según la provincia
+    public List<String> getCitiesByProvince(String province) {
+        return protectorsRepository.findCitiesByProvince(province);
+    }
+
     // Search protector by id
     public Optional<Protector> getProtectorById(Long id) {
         return protectorsRepository.findById(id);
