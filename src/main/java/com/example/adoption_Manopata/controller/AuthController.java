@@ -1,9 +1,6 @@
 package com.example.adoption_Manopata.controller;
 
-import com.example.adoption_Manopata.dto.AuthRequest;
-import com.example.adoption_Manopata.dto.ChangePasswordRequest;
-import com.example.adoption_Manopata.dto.ForgotPasswordRequest;
-import com.example.adoption_Manopata.dto.ResetPasswordRequest;
+import com.example.adoption_Manopata.dto.*;
 import com.example.adoption_Manopata.model.User;
 import com.example.adoption_Manopata.security.JwtUtil;
 import com.example.adoption_Manopata.service.EmailService;
@@ -18,6 +15,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,8 +24,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 
 @RestController
@@ -53,7 +53,7 @@ public class AuthController {
     private EmailService emailService;
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> createAuthenticationToken(@RequestBody AuthRequest authRequest) throws Exception {
+    public ResponseEntity<Map<String, Object>> createAuthenticationToken(@RequestBody AuthRequest authRequest) throws Exception {
         try {
             // Autenticar las credenciales
             authenticationManager.authenticate(
@@ -61,7 +61,7 @@ public class AuthController {
             );
         } catch (BadCredentialsException e) {
             // Si las credenciales son incorrectas, devolver un error en formato JSON
-            Map<String, String> errorResponse = new HashMap<>();
+            Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("error", "Incorrect username or password");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
         }
@@ -76,10 +76,21 @@ public class AuthController {
                 .findFirst()
                 .orElse("USER");  // Por defecto, asignamos el rol 'USER'
 
-        // Crear una respuesta JSON con el token
-        Map<String, String> response = new HashMap<>();
+        // Obtener el usuario desde la base de datos para obtener el ID
+        Optional<User> userOptional = userService.findByNickname(authRequest.getNickname());
+        if (!userOptional.isPresent()) {
+            // En caso de que no se encuentre el usuario, devolver un error
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("error", "User not found"));
+        }
+
+        User user = userOptional.get();
+        Long userId = user.getId();
+
+        // Crear una respuesta JSON con el token, rol y userId
+        Map<String, Object> response = new HashMap<>();
         response.put("token", jwt);
         response.put("role", role);
+        response.put("userId", userId);  // Añadir el userId a la respuesta
 
         return ResponseEntity.ok(response);
     }
@@ -130,18 +141,18 @@ public class AuthController {
     // CAMBIO DE CONTRASEÑA
     @PostMapping("/change-password")
     public ResponseEntity<Map<String, String>> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
-        User user = userService.findByNickname(changePasswordRequest.getNickname())
+        UserDetails loggedInUser = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String loggedInUsername = loggedInUser.getUsername();
+
+        User user = userService.findByNickname(loggedInUsername)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         boolean isPasswordChanged = userService.changePassword(user.getId(), changePasswordRequest.getOldPassword(), changePasswordRequest.getNewPassword());
 
-        Map<String, String> response = new HashMap<>();
         if (isPasswordChanged) {
-            response.put("message", "Contraseña actualizada exitosamente.");
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(Collections.singletonMap("message", "Contraseña cambiada con éxito."));
         } else {
-            response.put("message", "Error al cambiar la contraseña.");
-            return ResponseEntity.badRequest().body(response);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.singletonMap("message", "Error al cambiar la contraseña."));
         }
     }
 
@@ -171,7 +182,23 @@ public class AuthController {
         }
     }
 
-    // REFRESCAR TOKEN
+    // DESACTIVAR CUENTA
+    @PostMapping("/deactivate-account")
+    public ResponseEntity<String> deactivateAccount(@RequestBody DeleteAccountRequest deleteAccountRequest) {
+        User user = userService.findByNickname(deleteAccountRequest.getNickname())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado."));
+
+        // Verificar la contraseña proporcionada
+        if (!passwordEncoder.matches(deleteAccountRequest.getPassword(), user.getPassword())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Contraseña incorrecta.");
+        }
+
+        // Desactivar al usuario
+        userService.deactivateUser(user.getId(), deleteAccountRequest.getPassword());
+
+        return ResponseEntity.ok("Cuenta desactivada exitosamente.");
+    }
+
     @PostMapping("/refresh-token")
     public ResponseEntity<Map<String, String>> refreshToken(HttpServletRequest request) {
         String token = jwtUtil.resolveToken(request);

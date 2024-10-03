@@ -13,6 +13,7 @@ import java.util.Optional;
 
 @Service
 public class UserService {
+
     @Autowired
     private UserRepository userRepository;
 
@@ -22,70 +23,71 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    // Obtener todos los usuarios
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
+    // Obtener usuario por ID
     public Optional<User> getUserById(Long id) {
         return userRepository.findById(id);
     }
 
+    // Buscar usuario por email
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmailAndDeletedFalse(email);
     }
 
+    // Buscar usuario por nickname
     public Optional<User> findByNickname(String nickname) {
         return userRepository.findByNicknameAndDeletedFalse(nickname);
     }
 
+    // Crear nuevo usuario
     public void createUser(User user) {
-        // Verificar si el apellido está vacío
         if (user.getLastname() == null || user.getLastname().isEmpty()) {
             throw new IllegalArgumentException("El apellido es obligatorio.");
         }
 
-        // Verificar si el nickname ya está en uso
         if (existsByNickname(user.getNickname())) {
             throw new IllegalArgumentException("Error: El nickname ya está en uso.");
         }
 
-        // Verificar si el email ya está en uso
         if (existsByEmail(user.getEmail())) {
             throw new IllegalArgumentException("Error: El email ya está en uso.");
         }
 
-        // Asignar el rol "USER" si no está asignado
         Role userRole = roleRepository.findByName("USER");
         if (userRole == null) {
-            throw new RuntimeException("Role 'USER' not found");
+            throw new RuntimeException("Role 'USER' no encontrado");
         }
+
         user.setRole(userRole);
-
-        // Codificar la contraseña antes de guardar
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-        // Guardar el usuario en la base de datos (sin devolver nada)
+        user.setPassword(passwordEncoder.encode(user.getPassword()));  // Codificar contraseña
         userRepository.save(user);
     }
 
+    // Verificar si el nickname ya existe
     public boolean existsByNickname(String nickname) {
         return userRepository.existsByNicknameAndDeletedFalse(nickname);
     }
 
+    // Verificar si el email ya existe
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmailAndDeletedFalse(email);
     }
 
+    // Verificar disponibilidad de email
     public boolean isEmailAvailable(String email) {
         return !userRepository.existsByEmailAndDeletedFalse(email);
     }
 
-    // Save user changes
+    // Guardar cambios en un usuario
     public void save(User user) {
         userRepository.save(user);
     }
 
-    // Update user data
+    // Actualizar datos de usuario
     public User updateUser(Long id, User userDetails) {
         return userRepository.findById(id)
                 .map(user -> {
@@ -93,20 +95,21 @@ public class UserService {
                     user.setLastname(userDetails.getLastname());
                     user.setNickname(userDetails.getNickname());
                     user.setEmail(userDetails.getEmail());
-                    user.setPassword(userDetails.getPassword());
+                    if (userDetails.getPassword() != null && !userDetails.getPassword().isEmpty()) {
+                        user.setPassword(passwordEncoder.encode(userDetails.getPassword()));
+                    }
                     user.setRole(userDetails.getRole());
                     return userRepository.save(user);
-                }).orElseThrow(() -> new RuntimeException("User not found"));
+                }).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     }
 
+    // Cambiar contraseña del usuario
     public boolean changePassword(Long userId, String oldPassword, String newPassword) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
 
-            // Verify if the old password matches with the one stored
             if (passwordEncoder.matches(oldPassword, user.getPassword())) {
-                // If the old password matches, encode the new password and save it
                 user.setPassword(passwordEncoder.encode(newPassword));
                 userRepository.save(user);
                 return true;
@@ -117,30 +120,43 @@ public class UserService {
         return false;
     }
 
-    // Method to delete a user (mark as deleted)
-    public boolean deleteUser(Long userId, String password) {
+    // Método para que el admin desactive al usuario sin contraseña
+    public void deactivateUser(Long userId) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            user.setActive(false); // Desactiva al usuario
+            userRepository.save(user);
+        } else {
+            throw new RuntimeException("Usuario no encontrado.");
+        }
+    }
+
+    // Método para que el usuario desactive su propia cuenta con contraseña
+    public void deactivateUser(Long userId, String password) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
 
-            // Verify the password
+            // Verificar la contraseña
             if (passwordEncoder.matches(password, user.getPassword())) {
-                user.setDeleted(true);  // Mark the user as deleted
+                user.setActive(false); // Desactivar al usuario
                 userRepository.save(user);
-                return true;
             } else {
-                throw new RuntimeException("Contraseña incorrecta. No se puede eliminar la cuenta.");
+                throw new RuntimeException("Contraseña incorrecta. No se puede desactivar la cuenta.");
             }
         } else {
             throw new RuntimeException("Usuario no encontrado.");
         }
     }
 
-    // Deactivate user
-    public void deactivateUser(Long id) {
-        userRepository.findById(id).ifPresent(user -> {
-            user.setActive(false);
-            userRepository.save(user);
-        });
+    // Eliminar físicamente una cuenta (por el admin)
+    public void deleteUserByAdmin(Long userId) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isPresent()) {
+            userRepository.delete(optionalUser.get());
+        } else {
+            throw new RuntimeException("Usuario no encontrado.");
+        }
     }
 }

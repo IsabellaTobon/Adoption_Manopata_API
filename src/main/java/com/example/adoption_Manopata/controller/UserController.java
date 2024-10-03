@@ -1,17 +1,9 @@
 package com.example.adoption_Manopata.controller;
 
-import com.example.adoption_Manopata.dto.ChangePasswordRequest;
 import com.example.adoption_Manopata.dto.DeleteAccountRequest;
-import com.example.adoption_Manopata.dto.ForgotPasswordRequest;
-import com.example.adoption_Manopata.dto.ResetPasswordRequest;
 import com.example.adoption_Manopata.model.User;
-import com.example.adoption_Manopata.security.JwtUtil;
-import com.example.adoption_Manopata.service.EmailService;
-import com.example.adoption_Manopata.service.MyUserDetailsService;
+import com.example.adoption_Manopata.service.FileStorageService;
 import com.example.adoption_Manopata.service.UserService;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +12,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -33,40 +26,39 @@ public class UserController {
     private UserService userService;
 
     @Autowired
+    private FileStorageService fileStorageService;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
+    // Obtener todos los usuarios (solo admin)
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public List<User> getAllUsers() {
         return userService.getAllUsers();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        Optional<User> user = userService.getUserById(id);
-        return user.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    // Obtener perfil de usuario
+    @GetMapping("/profile/{id}")
+    public ResponseEntity<?> getUserProfile(@PathVariable Long id) {
+        Optional<User> userOptional = userService.getUserById(id);
+
+        if (!userOptional.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado.");
+        }
+
+        User user = userOptional.get();
+        UserDetails loggedInUser = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String loggedInUsername = loggedInUser.getUsername();
+
+        if (!user.getNickname().equals(loggedInUsername)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para ver este perfil.");
+        }
+
+        return ResponseEntity.ok(user);
     }
 
-    @GetMapping("/nickname/{nickname}")
-    public ResponseEntity<User> getUserByNickname(@PathVariable String nickname) {
-        Optional<User> user = userService.findByNickname(nickname);
-        return user.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("/check-nickname")
-    public ResponseEntity<Boolean> checkNicknameAvailability(@RequestParam String nickname) {
-        boolean exists = userService.existsByNickname(nickname);
-        return ResponseEntity.ok(!exists);
-    }
-
-    // Verificar disponibilidad de email
-    @GetMapping("/check-email")
-    public ResponseEntity<Boolean> checkEmailAvailability(@RequestParam String email) {
-        boolean isAvailable = userService.isEmailAvailable(email);
-        return new ResponseEntity<>(isAvailable, HttpStatus.OK);
-    }
-
+    // Actualizar datos de usuario
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
         UserDetails loggedInUser = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -74,68 +66,86 @@ public class UserController {
 
         Optional<User> optionalUser = userService.getUserById(id);
 
-        if (optionalUser.isPresent()) {
+        if (!optionalUser.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado.");
+        }
+
+        User user = optionalUser.get();
+
+        if (!user.getNickname().equals(loggedInUsername)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para actualizar este usuario.");
+        }
+
+        if (userDetails.getName() != null) user.setName(userDetails.getName());
+        if (userDetails.getLastname() != null) user.setLastname(userDetails.getLastname());
+        if (userDetails.getEmail() != null) user.setEmail(userDetails.getEmail());
+        if (userDetails.getNickname() != null && !userDetails.getNickname().equals(user.getNickname())) {
+            if (userService.existsByNickname(userDetails.getNickname())) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("El nombre de usuario ya está en uso.");
+            }
+            user.setNickname(userDetails.getNickname());
+        }
+
+        userService.save(user);
+        return ResponseEntity.ok(user);
+    }
+
+    // Subir imagen de perfil
+    @PutMapping("/{id}/profile-image")
+    public ResponseEntity<?> updateProfileImage(@PathVariable Long id, @RequestParam("image") MultipartFile imageFile) {
+        try {
+            Optional<User> optionalUser = userService.getUserById(id);
+
+            if (!optionalUser.isPresent()) {
+                return ResponseEntity.status(404).body("Usuario no encontrado.");
+            }
+
             User user = optionalUser.get();
+            UserDetails loggedInUser = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            String loggedInUsername = loggedInUser.getUsername();
 
             if (!user.getNickname().equals(loggedInUsername)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para actualizar este usuario.");
+                return ResponseEntity.status(403).body("No tienes permiso para actualizar la imagen de este usuario.");
             }
 
-            if (!passwordEncoder.matches(userDetails.getPassword(), user.getPassword())) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("La contraseña es incorrecta.");
-            }
+            // Guardar la imagen utilizando el servicio de almacenamiento de archivos
+            String fileName = fileStorageService.storeFile(imageFile);  // Manejar la excepción IOException
 
-            if (userDetails.getName() != null) user.setName(userDetails.getName());
-            if (userDetails.getLastname() != null) user.setLastname(userDetails.getLastname());
-            if (userDetails.getEmail() != null) user.setEmail(userDetails.getEmail());
-            if (userDetails.getNickname() != null && !userDetails.getNickname().equals(user.getNickname())) {
-                if (userService.existsByNickname(userDetails.getNickname())) {
-                    return ResponseEntity.status(HttpStatus.CONFLICT).body("El nombre de usuario ya está en uso.");
-                }
-                user.setNickname(userDetails.getNickname());
-            }
-
-            if (userDetails.getPassword() != null && !userDetails.getPassword().isEmpty()) {
-                user.setPassword(passwordEncoder.encode(userDetails.getPassword()));
-            }
-
+            // Actualizar el campo "photo" del usuario con el nombre del archivo guardado
+            user.setPhoto(fileName);
             userService.save(user);
-            return ResponseEntity.ok(user);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado.");
+
+            return ResponseEntity.ok("Imagen de perfil actualizada correctamente.");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al actualizar la imagen de perfil.");
         }
     }
 
-    @PostMapping("/delete-account")
-    public ResponseEntity<String> deleteAccount(@RequestBody DeleteAccountRequest deleteAccountRequest) {
+    // Desactivar cuenta (en lugar de eliminar)
+    @PostMapping("/{id}/deactivate-account")
+    public ResponseEntity<String> deactivateAccount(@PathVariable Long id, @RequestBody DeleteAccountRequest deleteAccountRequest) {
         UserDetails loggedInUser = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String loggedInUsername = loggedInUser.getUsername();
 
-        User user = userService.findByNickname(loggedInUsername)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado."));
-
-        boolean deleted = userService.deleteUser(user.getId(), deleteAccountRequest.getPassword());
-
-        if (deleted) {
-            return ResponseEntity.ok("Cuenta eliminada exitosamente.");
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No se pudo eliminar la cuenta.");
-        }
-    }
-
-    // Activate user (ADMIN)
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/activate-user/{id}")
-    public ResponseEntity<String> activateUser(@PathVariable Long id) {
         Optional<User> userOptional = userService.getUserById(id);
-
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            user.setActive(true);
-            userService.save(user);
-            return ResponseEntity.ok("Usuario activado correctamente.");
-        } else {
+        if (!userOptional.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado.");
         }
+
+        User user = userOptional.get();
+        if (!user.getNickname().equals(loggedInUsername)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para desactivar esta cuenta.");
+        }
+
+        // Verificar la contraseña proporcionada
+        if (!passwordEncoder.matches(deleteAccountRequest.getPassword(), user.getPassword())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("La contraseña es incorrecta.");
+        }
+
+        // Desactivar el usuario en lugar de eliminarlo
+        user.setActive(false);  // Esto asume que tienes un campo "active" en tu modelo User
+        userService.save(user);
+
+        return ResponseEntity.ok("Cuenta desactivada exitosamente.");
     }
 }

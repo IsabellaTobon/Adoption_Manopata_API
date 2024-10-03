@@ -39,10 +39,17 @@ public class AdminUserController {
         return ResponseEntity.ok(updatedUser);
     }
 
-    // Delete user (probably deactivate)
+    // Desactivar usuario
+    @PostMapping("/{id}/deactivate")
+    public ResponseEntity<Void> deactivateUser(@PathVariable Long id) {
+        userService.deactivateUser(id);  // Desactivar al usuario sin contraseña
+        return ResponseEntity.ok().build();
+    }
+
+    // Eliminar permanentemente un usuario (solo admin)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        userService.deactivateUser(id);  // Desactiva el usuario en lugar de eliminarlo físicamente
+        userService.deleteUserByAdmin(id);  // Cambiar a deleteUserByAdmin
         return ResponseEntity.ok().build();
     }
 }

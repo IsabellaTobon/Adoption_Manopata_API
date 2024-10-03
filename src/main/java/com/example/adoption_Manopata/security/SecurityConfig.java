@@ -46,6 +46,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/comments").permitAll()  // Permitir obtener comentarios (GET)
                         .requestMatchers("/api/comments/create").authenticated()  // Requerir autenticación para crear comentarios
 
+                        // Rutas relacionadas con el usuario
+                        .requestMatchers("/api/user/profile/**").authenticated()  // Solo usuarios autenticados pueden ver y editar su perfil
+                        .requestMatchers("/api/user/{id}/profile-image").authenticated()  // Requiere autenticación para actualizar imagen de perfil
+                        .requestMatchers("/api/user/delete-account").authenticated()  // Requiere autenticación para eliminar la cuenta
+                        .requestMatchers("/api/user/**").authenticated()  // Otras operaciones de usuario requieren autenticación
+
                         // Rutas que requieren autenticación
                         .requestMatchers("/api/post/create", "/api/post/**/update", "/api/post/**/delete").authenticated()
                         .requestMatchers("/api/admin/**").hasAuthority("ADMIN")  // Solo admin puede acceder a rutas admin
