@@ -62,6 +62,10 @@ public class UserService {
             throw new RuntimeException("Role 'USER' no encontrado");
         }
 
+        if (user.getPhoto() == null || user.getPhoto().isEmpty()) {
+            user.setPhoto("/images/default-image.webp");  // Ruta de la imagen por defecto
+        }
+
         user.setRole(userRole);
         user.setPassword(passwordEncoder.encode(user.getPassword()));  // Codificar contraseña
         userRepository.save(user);
