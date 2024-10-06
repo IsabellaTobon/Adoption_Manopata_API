@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,19 +45,27 @@ public class UserController {
         Optional<User> userOptional = userService.getUserById(id);
 
         if (!userOptional.isPresent()) {
+            System.out.println("Usuario no encontrado para ID: " + id);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado.");
         }
 
         User user = userOptional.get();
+        System.out.println("Foto del usuario: " + user.getPhoto());
         UserDetails loggedInUser = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String loggedInUsername = loggedInUser.getUsername();
 
+        // Verificar si el usuario autenticado es el mismo que está intentando acceder
+        System.out.println("Usuario autenticado: " + loggedInUsername + ", Usuario solicitado: " + user.getNickname());
+
         if (!user.getNickname().equals(loggedInUsername)) {
+            System.out.println("Acceso denegado al perfil del usuario: " + user.getNickname());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para ver este perfil.");
         }
 
+        System.out.println("Acceso concedido al perfil del usuario: " + user.getNickname());
         return ResponseEntity.ok(user);
-    }
+    } // pues entonces por teams
+
 
     // Actualizar datos de usuario
     @PutMapping("/{id}")
@@ -94,9 +103,13 @@ public class UserController {
     @PutMapping("/{id}/profile-image")
     public ResponseEntity<?> updateProfileImage(@PathVariable Long id, @RequestParam("image") MultipartFile imageFile) {
         try {
+            // Log para verificar que el archivo se está recibiendo correctamente
+            System.out.println("Recibiendo archivo: " + imageFile.getOriginalFilename());
+
             Optional<User> optionalUser = userService.getUserById(id);
 
             if (!optionalUser.isPresent()) {
+                System.out.println("Usuario no encontrado: " + id);  // Log si no se encuentra el usuario
                 return ResponseEntity.status(404).body("Usuario no encontrado.");
             }
 
@@ -105,18 +118,27 @@ public class UserController {
             String loggedInUsername = loggedInUser.getUsername();
 
             if (!user.getNickname().equals(loggedInUsername)) {
+                System.out.println("Usuario no autorizado para actualizar imagen: " + loggedInUsername);  // Log si no tiene permisos
                 return ResponseEntity.status(403).body("No tienes permiso para actualizar la imagen de este usuario.");
             }
 
+            // Log para verificar si la imagen es válida y no está vacía
+            if (imageFile.isEmpty()) {
+                System.out.println("El archivo de imagen está vacío");
+                return ResponseEntity.badRequest().body("La imagen es obligatoria");
+            }
+
             // Guardar la imagen utilizando el servicio de almacenamiento de archivos
-            String fileName = fileStorageService.storeFile(imageFile);  // Manejar la excepción IOException
+            String fileName = fileStorageService.storeFile(imageFile);
+            System.out.println("Imagen guardada con nombre: " + fileName);  // Log para confirmar que el archivo se ha guardado
 
-            // Actualizar el campo "photo" del usuario con el nombre del archivo guardado
-            user.setPhoto(fileName);
-            userService.save(user);
+            user.setPhoto("/uploads/" + fileName);
+            userService.save(user);  // Guardar los datos actualizados del usuario
+            System.out.println("Usuario guardado con imagen actualizada: " + user.getPhoto());  // Verificar que el usuario se guarda correctamente con la imagen
 
-            return ResponseEntity.ok("Imagen de perfil actualizada correctamente.");
+            return ResponseEntity.ok(Collections.singletonMap("fileName", fileName));
         } catch (Exception e) {
+            System.out.println("Error al actualizar la imagen: " + e.getMessage());  // Log para capturar cualquier error
             return ResponseEntity.status(500).body("Error al actualizar la imagen de perfil.");
         }
     }

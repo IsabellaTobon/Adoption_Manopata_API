@@ -15,22 +15,23 @@ public class FileStorageService {
     private String uploadDir;
 
     public String storeFile(MultipartFile file) throws IOException {
-        // Generate a unique file name
-        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+        // Log para verificar la ruta de almacenamiento y el nombre del archivo
+        System.out.println("Almacenando archivo en: " + uploadDir + " con nombre: " + file.getOriginalFilename());
 
-        // Get the upload directory path
+        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
         Path uploadPath = Paths.get(uploadDir);
 
-        // Create the directory if it doesn't exist
+        // Crear el directorio si no existe
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
+            System.out.println("Directorio de subida creado: " + uploadPath.toString());  // Log si el directorio se crea
         }
 
-        // Save the file to the server
+        // Guardar el archivo en el servidor
         Path filePath = uploadPath.resolve(fileName);
         Files.copy(file.getInputStream(), filePath);
+        System.out.println("Archivo guardado en: " + filePath.toString());  // Log para confirmar que el archivo se ha guardado
 
-        // Return the file name
         return fileName;
     }
 }
