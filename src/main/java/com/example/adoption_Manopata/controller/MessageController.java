@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -28,10 +29,13 @@ public class MessageController {
     private PostService postService;
 
     @PostMapping("/send")
-    public ResponseEntity<Message> sendMessage(@RequestParam Long senderId,
-                                               @RequestParam Long receiverId,
-                                               @RequestParam String bodyText,
-                                               @RequestParam Long postId) {
+    public ResponseEntity<Message> sendMessage(@RequestBody Map<String, Object> payload) {
+        // Extraer senderId, receiverId, bodyText, y postId desde el JSON
+        Long senderId = Long.valueOf(payload.get("senderId").toString());
+        Long receiverId = Long.valueOf(payload.get("receiverId").toString());
+        String bodyText = payload.get("bodyText").toString();
+        Long postId = Long.valueOf(payload.get("postId").toString());
+
         // Obtener sender, receiver y post a partir de sus IDs
         User sender = userService.getUserById(senderId)
                 .orElseThrow(() -> new RuntimeException("Sender not found"));
@@ -40,6 +44,7 @@ public class MessageController {
         Post post = postService.getPostById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
+        // Crear el mensaje y enviarlo
         Message message = messageService.sendMessage(sender, receiver, bodyText, post);
         return ResponseEntity.ok(message);
     }
