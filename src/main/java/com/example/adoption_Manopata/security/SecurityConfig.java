@@ -46,6 +46,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/comments").permitAll()  // Permitir obtener comentarios (GET)
                         .requestMatchers("/api/comments/create").authenticated()  // Requerir autenticación para crear comentarios
 
+                        // Seguridad para los mensajes
+                        .requestMatchers("/api/messages/**").authenticated()  // Requiere autenticación para enviar mensajes
                         // Rutas relacionadas con el usuario
                         .requestMatchers("/api/user/profile/**").authenticated()  // Solo usuarios autenticados pueden ver y editar su perfil
                         .requestMatchers("/api/user/{id}/profile-image").authenticated()  // Requiere autenticación para actualizar imagen de perfil

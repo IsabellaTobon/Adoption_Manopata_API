@@ -7,6 +7,7 @@ import com.example.adoption_Manopata.service.MessageService;
 import com.example.adoption_Manopata.service.PostService;
 import com.example.adoption_Manopata.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,13 +46,13 @@ public class MessageController {
 
     @GetMapping("/inbox")
     public ResponseEntity<List<Message>> getInboxMessages(@RequestParam Long userId) {
-        List<Message> messages = messageService.getInboxMessages(userId);
-        return ResponseEntity.ok(messages);
+        try {
+            List<Message> messages = messageService.getInboxMessages(userId);
+            return ResponseEntity.ok(messages);
+        } catch (Exception e) {
+            // Manejar el error adecuadamente y devolver un error con más contexto
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
-    @GetMapping("/sent")
-    public ResponseEntity<List<Message>> getSentMessages(@RequestParam Long userId) {
-        List<Message> messages = messageService.getSentMessages(userId);
-        return ResponseEntity.ok(messages);
-    }
 }
