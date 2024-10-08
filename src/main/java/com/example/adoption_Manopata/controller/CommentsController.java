@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -49,6 +50,7 @@ public class CommentsController {
         // Asignar el nombre y el usuario al comentario
         comment.setName(user.getNickname());
         comment.setUser(user);
+        comment.setCommentDate(new Timestamp(System.currentTimeMillis()));
 
         // Guardar el comentario
         Comment savedComment = commentService.saveComment(comment);

@@ -94,5 +94,6 @@ CREATE TABLE IF NOT EXISTS comments (
     text TEXT NOT NULL,
     rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
     userId BIGINT NOT NULL,
+    commentDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     FOREIGN KEY (userId) REFERENCES users(id)
 );

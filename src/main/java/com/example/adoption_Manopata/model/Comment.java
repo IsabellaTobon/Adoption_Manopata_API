@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.sql.Timestamp;
+
 @Entity
 @Data
 @Table(name = "comments", uniqueConstraints = {
@@ -19,6 +21,9 @@ public class Comment {
 
     @NotNull
     private String text;
+
+    @Column(nullable = false)
+    private Timestamp commentDate;
 
     @NotNull
     private int rating;
