@@ -52,15 +52,35 @@ public class PostController {
             @RequestParam(required = false) Boolean isPPP,
             @RequestParam(required = false) Boolean vaccinated,
             Pageable pageable,
-            PagedResourcesAssembler<Post> assembler // Usamos PagedResourcesAssembler
+            PagedResourcesAssembler<Post> assembler,  // Usamos PagedResourcesAssembler
+            Principal principal // Para obtener el usuario autenticado
     ) {
         // Obtener los posts filtrados
         Page<Post> posts = postService.getFilteredPosts(province, city, breed, animalType, available, isPPP, vaccinated, pageable);
 
+        final User user;
+
+        if (principal != null) {
+            String nickname = principal.getName();
+            user = userService.findByNickname(nickname).orElse(null);
+        } else {
+            user = null;
+        }
+
+        posts.forEach(post -> {
+            if (user != null) {
+                boolean hasLiked = post.getLikedByUsers().contains(user);
+                post.setUserHasLiked(hasLiked);
+                System.out.println("Post " + post.getId() + " - Usuario " + user.getId() + " ha dado like: " + hasLiked);
+            } else {
+                post.setUserHasLiked(false);
+            }
+        });
+
         // Convertir a PagedModel<EntityModel<Post>>
         PagedModel<EntityModel<Post>> pagedModel = assembler.toModel(posts);
 
-        return ResponseEntity.ok(pagedModel);  // Devolver el modelo paginado
+        return ResponseEntity.ok(pagedModel);
     }
 
     // Obtain post by id

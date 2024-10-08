@@ -61,6 +61,9 @@ public class Post {
     @Column(nullable = false)
     private int likes = 0;
 
+    @Transient
+    private boolean userHasLiked;
+
     @ManyToOne
     @JoinColumn(name = "userId", nullable = false)
     private User user;
