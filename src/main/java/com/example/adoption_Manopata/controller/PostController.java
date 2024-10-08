@@ -71,7 +71,6 @@ public class PostController {
             if (user != null) {
                 boolean hasLiked = post.getLikedByUsers().contains(user);
                 post.setUserHasLiked(hasLiked);
-                System.out.println("Post " + post.getId() + " - Usuario " + user.getId() + " ha dado like: " + hasLiked);
             } else {
                 post.setUserHasLiked(false);
             }

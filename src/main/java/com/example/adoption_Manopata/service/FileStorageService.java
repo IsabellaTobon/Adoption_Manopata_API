@@ -15,22 +15,17 @@ public class FileStorageService {
     private String uploadDir;
 
     public String storeFile(MultipartFile file) throws IOException {
-        // Log para verificar la ruta de almacenamiento y el nombre del archivo
-        System.out.println("Almacenando archivo en: " + uploadDir + " con nombre: " + file.getOriginalFilename());
-
         String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
         Path uploadPath = Paths.get(uploadDir);
 
         // Crear el directorio si no existe
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
-            System.out.println("Directorio de subida creado: " + uploadPath.toString());  // Log si el directorio se crea
         }
 
         // Guardar el archivo en el servidor
         Path filePath = uploadPath.resolve(fileName);
         Files.copy(file.getInputStream(), filePath);
-        System.out.println("Archivo guardado en: " + filePath.toString());  // Log para confirmar que el archivo se ha guardado
 
         return fileName;
     }

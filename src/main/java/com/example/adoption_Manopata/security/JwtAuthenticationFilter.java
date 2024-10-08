@@ -33,7 +33,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // Verificar si el encabezado Authorization está presente y si comienza con "Bearer "
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            System.out.println("No se encontró el header Authorization o no empieza con Bearer");
             chain.doFilter(request, response);  // Continuar el filtro sin autenticar
             return;
         }
@@ -41,8 +40,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // Extraer el token JWT del encabezado
         String jwt = authorizationHeader.substring(7);
         String username = jwtUtil.extractNickname(jwt);
-        System.out.println("JWT recibido: " + jwt);
-        System.out.println("Usuario extraído del JWT: " + username);
 
         // Validar si el usuario no está ya autenticado en el contexto de seguridad
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -52,7 +49,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // Cargar los detalles del usuario desde la base de datos
                 userDetails = this.userDetailsService.loadUserByUsername(username);
             } catch (UsernameNotFoundException e) {
-                System.out.println("Usuario no encontrado: " + username);
                 chain.doFilter(request, response);  // Continuar el filtro sin autenticar
                 return;
             }
