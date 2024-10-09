@@ -61,6 +61,16 @@ public class CommentsController {
 
     @GetMapping
     public List<Comment> getComments() {
-        return commentService.getAllComments();
+        List<Comment> comments = commentService.getAllComments();
+
+        // Asegúrate de que cada usuario tenga una imagen por defecto si el campo photo es null
+        comments.forEach(comment -> {
+            User user = comment.getUser();
+            if (user.getPhoto() == null || user.getPhoto().isEmpty()) {
+                user.setPhoto("/images/default-image.webp");
+            }
+        });
+
+        return comments;
     }
 }

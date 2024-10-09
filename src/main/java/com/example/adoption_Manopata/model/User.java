@@ -1,5 +1,6 @@
 package com.example.adoption_Manopata.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,6 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "comments"}) // Ignorar relaciones que puedan causar bucles
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
