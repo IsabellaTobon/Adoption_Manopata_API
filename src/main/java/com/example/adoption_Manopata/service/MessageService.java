@@ -37,4 +37,8 @@ public class MessageService {
         return messageRepository.findBySenderId(userId);
     }
 
+    // Get message history between two users
+    public List<Message> getChatHistory(Long userId1, Long userId2) {
+        return messageRepository.findChatHistoryBetweenUsers(userId1, userId2);
+    }
 }

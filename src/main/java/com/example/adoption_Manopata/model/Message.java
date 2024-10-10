@@ -32,4 +32,8 @@ public class Message {
     @JoinColumn(name = "postId", nullable = false)
     private Post post;
 
+    @ManyToOne
+    @JoinColumn(name = "parentMessageId")
+    private Message parentMessage;
+
 }

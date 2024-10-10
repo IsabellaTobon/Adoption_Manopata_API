@@ -82,9 +82,11 @@ CREATE TABLE IF NOT EXISTS messages (
     senderId BIGINT NOT NULL,
     receiverId BIGINT NOT NULL,
     postId BIGINT NOT NULL,
+    parentMessageId BIGINT,
     FOREIGN KEY (senderId) REFERENCES users(id),
     FOREIGN KEY (receiverId) REFERENCES users(id),
-    FOREIGN KEY (postId) REFERENCES posts(id)
+    FOREIGN KEY (postId) REFERENCES posts(id),
+    FOREIGN KEY (parentMessageId) REFERENCES messages(id) ON DELETE SET NULL
 );
 
 -- Crear la tabla de comentarios
