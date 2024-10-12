@@ -1,9 +1,9 @@
 package com.example.adoption_Manopata.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import jakarta.validation.constraints.NotNull;
 import java.sql.Timestamp;
 
 @Entity
