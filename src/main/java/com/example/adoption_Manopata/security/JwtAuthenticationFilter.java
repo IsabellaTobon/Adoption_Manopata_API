@@ -31,40 +31,40 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final String authorizationHeader = request.getHeader("Authorization");
 
-        // Verificar si el encabezado Authorization está presente y si comienza con "Bearer "
+        // VERIFICAR SI EL ENCABEZADO AUTHORIZATION ESTÁ PRESENTE Y SI COMIENZA CON "BEARER "
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            chain.doFilter(request, response);  // Continuar el filtro sin autenticar
+            chain.doFilter(request, response);  // CONTINUE FILTER WITHOUT AUTHENTICATING
             return;
         }
 
-        // Extraer el token JWT del encabezado
+        // EXTRACT JWT TOKEN FROM HEADER
         String jwt = authorizationHeader.substring(7);
         String username = jwtUtil.extractNickname(jwt);
 
-        // Validar si el usuario no está ya autenticado en el contexto de seguridad
+        // VALIDATE IF THE USER IS NOT ALREADY AUTHENTICATED IN THE SECURITY CONTEXT
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
             UserDetails userDetails;
             try {
-                // Cargar los detalles del usuario desde la base de datos
+                // LOAD USER DETAILS FROM DATABASE
                 userDetails = this.userDetailsService.loadUserByUsername(username);
             } catch (UsernameNotFoundException e) {
-                chain.doFilter(request, response);  // Continuar el filtro sin autenticar
+                chain.doFilter(request, response);  // CONTINUE FILTER WITHOUT AUTHENTICATING
                 return;
             }
 
-            // Validar el JWT y los detalles del usuario
+            // VALIDATE THE JWT AND USER DETAILS
             if (jwtUtil.validateToken(jwt, userDetails)) {
                 System.out.println("JWT validado correctamente para el usuario: " + username);
 
-                // Crear el token de autenticación
+                // CREATE TOKEN AUTHENTICATION
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
 
-                // Asociar los detalles de la solicitud HTTP
+                // ASOCIAR LOS DETALLES DE LA SOLICITUD HTTP
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                // Configurar el contexto de seguridad para el usuario autenticado
+                // CONFIGURE THE SECURITY CONTEXT FOR THE AUTHENTICATED USER
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             } else {
                 System.out.println("JWT no válido o UserDetails es nulo para el usuario: " + username);
@@ -73,7 +73,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             System.out.println("Usuario ya autenticado o no encontrado");
         }
 
-        // Continuar con el siguiente filtro en la cadena
         chain.doFilter(request, response);
     }
 }

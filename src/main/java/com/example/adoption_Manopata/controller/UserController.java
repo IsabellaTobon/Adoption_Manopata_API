@@ -32,14 +32,14 @@ public class UserController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // Obtener todos los usuarios (solo admin)
+    // OBTAIN ALL USERS (ONLY ADMIN)
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public List<User> getAllUsers() {
         return userService.getAllUsers();
     }
 
-    // Obtener perfil de usuario
+    // OBTAIN USER PROFILE
     @GetMapping("/profile/{id}")
     public ResponseEntity<?> getUserProfile(@PathVariable Long id) {
         Optional<User> userOptional = userService.getUserById(id);
@@ -54,7 +54,7 @@ public class UserController {
         UserDetails loggedInUser = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String loggedInUsername = loggedInUser.getUsername();
 
-        // Verificar si el usuario autenticado es el mismo que está intentando acceder
+        // VERIFY IF THE AUTHENTICATED USER IS THE SAME ONE TRYING TO ACCESS
         System.out.println("Usuario autenticado: " + loggedInUsername + ", Usuario solicitado: " + user.getNickname());
 
         if (!user.getNickname().equals(loggedInUsername)) {
@@ -64,10 +64,10 @@ public class UserController {
 
         System.out.println("Acceso concedido al perfil del usuario: " + user.getNickname());
         return ResponseEntity.ok(user);
-    } // pues entonces por teams
+    }
 
 
-    // Actualizar datos de usuario
+    // UPDATE USER DATA
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
         UserDetails loggedInUser = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -99,17 +99,17 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    // Subir imagen de perfil
+    // UPLOAD IMAGE PROFILE
     @PutMapping("/{id}/profile-image")
     public ResponseEntity<?> updateProfileImage(@PathVariable Long id, @RequestParam("image") MultipartFile imageFile) {
         try {
-            // Log para verificar que el archivo se está recibiendo correctamente
+            // LOG TO VERIFY THAT THE FILE IS BEING RECEIVED CORRECTLY
             System.out.println("Recibiendo archivo: " + imageFile.getOriginalFilename());
 
             Optional<User> optionalUser = userService.getUserById(id);
 
             if (!optionalUser.isPresent()) {
-                System.out.println("Usuario no encontrado: " + id);  // Log si no se encuentra el usuario
+                System.out.println("Usuario no encontrado: " + id);  // LOG IF THE USER IS NOT FOUND
                 return ResponseEntity.status(404).body("Usuario no encontrado.");
             }
 
@@ -118,32 +118,32 @@ public class UserController {
             String loggedInUsername = loggedInUser.getUsername();
 
             if (!user.getNickname().equals(loggedInUsername)) {
-                System.out.println("Usuario no autorizado para actualizar imagen: " + loggedInUsername);  // Log si no tiene permisos
+                System.out.println("Usuario no autorizado para actualizar imagen: " + loggedInUsername);  // LOG IF THE USER DOES NOT HAVE PERMISSIONS
                 return ResponseEntity.status(403).body("No tienes permiso para actualizar la imagen de este usuario.");
             }
 
-            // Log para verificar si la imagen es válida y no está vacía
+            // LOG TO VERIFY IF THE IMAGE IS VALID AND NOT EMPTY
             if (imageFile.isEmpty()) {
                 System.out.println("El archivo de imagen está vacío");
                 return ResponseEntity.badRequest().body("La imagen es obligatoria");
             }
 
-            // Guardar la imagen utilizando el servicio de almacenamiento de archivos
+            // SAVE THE IMAGE USING THE FILE STORAGE SERVICE
             String fileName = fileStorageService.storeFile(imageFile);
-            System.out.println("Imagen guardada con nombre: " + fileName);  // Log para confirmar que el archivo se ha guardado
+            System.out.println("Imagen guardada con nombre: " + fileName);  // LOG TO CONFIRM THAT THE FILE HAS BEEN SAVED
 
             user.setPhoto("/uploads/" + fileName);
             userService.save(user);  // Guardar los datos actualizados del usuario
-            System.out.println("Usuario guardado con imagen actualizada: " + user.getPhoto());  // Verificar que el usuario se guarda correctamente con la imagen
+            System.out.println("Usuario guardado con imagen actualizada: " + user.getPhoto());  // VERIFY THAT THE USER SAVES CORRECTLY WITH THE IMAGE
 
             return ResponseEntity.ok(Collections.singletonMap("fileName", fileName));
         } catch (Exception e) {
-            System.out.println("Error al actualizar la imagen: " + e.getMessage());  // Log para capturar cualquier error
+            System.out.println("Error al actualizar la imagen: " + e.getMessage());  // LOG TO CAPTURE ANY ERRORS
             return ResponseEntity.status(500).body("Error al actualizar la imagen de perfil.");
         }
     }
 
-    // Desactivar cuenta (en lugar de eliminar)
+    // DEACTIVATE ACCOUNT (NOT ELIMINATED)
     @PostMapping("/{id}/deactivate-account")
     public ResponseEntity<String> deactivateAccount(@PathVariable Long id, @RequestBody DeleteAccountRequest deleteAccountRequest) {
         UserDetails loggedInUser = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -159,13 +159,13 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para desactivar esta cuenta.");
         }
 
-        // Verificar la contraseña proporcionada
+        // VERIFY PASSWORD
         if (!passwordEncoder.matches(deleteAccountRequest.getPassword(), user.getPassword())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("La contraseña es incorrecta.");
         }
 
         // Desactivar el usuario en lugar de eliminarlo
-        user.setActive(false);  // Esto asume que tienes un campo "active" en tu modelo User
+        user.setActive(false);  // THIS ASSUMES THAT THE USER HAS AN "ACTIVE" FIELD IN THE USER MODEL
         userService.save(user);
 
         return ResponseEntity.ok("Cuenta desactivada exitosamente.");

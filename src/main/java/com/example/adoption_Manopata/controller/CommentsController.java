@@ -27,12 +27,12 @@ public class CommentsController {
 
     @PostMapping("/create")
     public ResponseEntity<?> createComment(@RequestBody Comment comment, Principal principal) {
-        // Verificar que el usuario está autenticado
+        // VERIFY THAT THE USER IS AUTHENTICATED
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Usuario no autenticado"));
         }
 
-        // Obtener el nickname del usuario autenticado desde el JWT
+        // GET THE NICKNAME OF THE AUTHENTICATED USER FROM THE JWT
         String nickname = principal.getName();
         Optional<User> userOpt = userService.findByNickname(nickname);
 
@@ -42,20 +42,20 @@ public class CommentsController {
 
         User user = userOpt.get();
 
-        // Verificar si el usuario ya ha hecho un comentario
+        // CHECK IF THE USER HAS ALREADY MADE A COMMENT
         if (commentService.existsByUser(user)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "El usuario ya ha hecho un comentario"));
         }
 
-        // Asignar el nombre y el usuario al comentario
+        // ASSIGN THE NAME AND USER TO THE COMMENT
         comment.setName(user.getNickname());
         comment.setUser(user);
         comment.setCommentDate(new Timestamp(System.currentTimeMillis()));
 
-        // Guardar el comentario
+        // SAVE COMMENT
         Comment savedComment = commentService.saveComment(comment);
 
-        // Devolver una respuesta JSON con el mensaje y el comentario guardado
+        // RETURN A JSON RESPONSE WITH THE MESSAGE AND THE SAVED COMMENT
         return ResponseEntity.ok(Map.of("message", "Comentario creado exitosamente", "comment", savedComment));
     }
 
@@ -63,7 +63,7 @@ public class CommentsController {
     public List<Comment> getComments() {
         List<Comment> comments = commentService.getAllComments();
 
-        // Asegúrate de que cada usuario tenga una imagen por defecto si el campo photo es null
+        // MAKE SURE EACH USER HAS A DEFAULT IMAGE IF THE PHOTO FIELD IS NULL
         comments.forEach(comment -> {
             User user = comment.getUser();
             if (user.getPhoto() == null || user.getPhoto().isEmpty()) {

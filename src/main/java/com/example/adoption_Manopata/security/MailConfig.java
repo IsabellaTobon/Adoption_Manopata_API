@@ -10,24 +10,24 @@ import java.util.Properties;
 @Configuration
 public class MailConfig {
 
-    //Use MailHog
+    // USE MAILHOG
 
     @Bean
     public JavaMailSender getJavaMailSender(){
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
 
-        // Configuración para MailHog (puedes modificarla para usar otro servicio SMTP de prueba)
+        // MAILHOG CONFIGURATION
         mailSender.setHost("localhost");
-        mailSender.setPort(1025);  // Puerto por defecto para MailHog
+        mailSender.setPort(1025);  // DEFAULT PORT ON MAILHOG
 
-        // Si utilizas un servidor SMTP con autenticación, agrega estas líneas:
-        // mailSender.setUsername("tu-username");
-        // mailSender.setPassword("tu-password");
+        // IF AN SMTP SERVER WITH AUTHENTICATION IS USED, ADD THESE LINES
+        // mailSender.setUsername("username");
+        // mailSender.setPassword("password");
 
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
-        props.put("mail.smtp.auth", "false"); // Cambiar a true si tu servidor SMTP requiere autenticación
-        props.put("mail.smtp.starttls.enable", "false"); // Cambiar a true si necesitas TLS
+        props.put("mail.smtp.auth", "false"); // CHANGE TO TRUE IF YOUR SMTP SERVER REQUIRES AUTHENTICATION
+        props.put("mail.smtp.starttls.enable", "false"); // CHANGE TO TRUE IF TLS IS REQUIRED
 
         return mailSender;
     }

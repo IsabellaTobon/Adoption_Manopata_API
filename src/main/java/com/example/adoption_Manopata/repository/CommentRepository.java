@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
-    // Método para verificar si el usuario ya ha hecho un comentario
+    // METHOD TO CHECK IF THE USER HAS ALREADY MADE A COMMENT
     boolean existsByUser(User user);
 }

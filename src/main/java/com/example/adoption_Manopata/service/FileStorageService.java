@@ -18,12 +18,12 @@ public class FileStorageService {
         String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
         Path uploadPath = Paths.get(uploadDir);
 
-        // Crear el directorio si no existe
+        // CREATE THE DIRECTORY IF IT DOES NOT EXIST
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
 
-        // Guardar el archivo en el servidor
+        // SAVE THE FILE TO THE SERVER
         Path filePath = uploadPath.resolve(fileName);
         Files.copy(file.getInputStream(), filePath);
 

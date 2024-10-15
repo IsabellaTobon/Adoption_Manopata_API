@@ -16,7 +16,7 @@ public class MessageService {
     @Autowired
     private MessageRepository messageRepository;
 
-    // Method for sending a message
+    // METHOD FOR SENDING A MESSAGE
     public Message sendMessage(User sender, User receiver, String bodyText, Post post) {
         Message message = new Message();
         message.setSender(sender);
@@ -27,17 +27,17 @@ public class MessageService {
         return messageRepository.save(message);
     }
 
-    // Obtain all messages received
+    // OBTAIN ALL MESSAGES RECEIVED
     public List<Message> getInboxMessages(Long userId) {
         return messageRepository.findByReceiverId(userId);
     }
 
-    // Obtain all messages sent
+    // OBTAIN ALL MESSAGES SENT
     public List<Message> getSentMessages(Long userId) {
         return messageRepository.findBySenderId(userId);
     }
 
-    // Get message history between two users
+    // GET MESSAGE HISTORY BETWEEN TWO USERS
     public List<Message> getChatHistory(Long userId1, Long userId2) {
         return messageRepository.findChatHistoryBetweenUsers(userId1, userId2);
     }

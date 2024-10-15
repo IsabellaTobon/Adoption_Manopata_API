@@ -18,7 +18,7 @@ import java.util.Map;
 public class Filecontroller {
     private FileStorageService fileStorageService;
 
-    // Inyección de dependencias a través del constructor
+    // DEPENDENCY INJECTION THROUGH THE CONSTRUCTOR
     @Autowired
     public Filecontroller(FileStorageService fileStorageService) {
         this.fileStorageService = fileStorageService;

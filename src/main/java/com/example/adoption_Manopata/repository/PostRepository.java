@@ -15,10 +15,10 @@ import java.util.List;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificationExecutor<Post> {
 
-    // Method to find all posts by user id with pagination
+    // METHOD TO FIND ALL POSTS BY USER ID WITH PAGINATION
     Page<Post> findByUserId(Long userId, Pageable pageable);
 
-    // Method to find posts by filters with pagination
+    // METHOD TO FIND POSTS BY FILTERS WITH PAGINATION
     Page<Post> findByProvinceAndCityAndBreedAndAnimalTypeAndAvailableAndPppAndVaccinated(
             String province,
             String city,
@@ -30,15 +30,15 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
             Pageable pageable
     );
 
-    // Obtener todas las provincias
+    // OBTAIN ALL PROVINCES
     @Query("SELECT DISTINCT p.province FROM Post p")
     List<String> findAllProvinces();
 
-    // Obtener ciudades según la provincia
+    // GET CITIES BY PROVINCE
     @Query("SELECT DISTINCT p.city FROM Post p WHERE p.province = :province")
     List<String> findCitiesByProvince(@Param("province") String province);
 
-    // Obtener razas según el tipo de animal
+    // GET BREEDS BASED ON ANIMAL TYPE
     @Query("SELECT DISTINCT p.breed FROM Post p WHERE p.animalType = :animalType")
     List<String> findBreedsByAnimalType(@Param("animalType") String animalType);
 }

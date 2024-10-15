@@ -19,14 +19,14 @@ public class MyUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String nickname) throws UsernameNotFoundException {
-        // Search user by nickname on database
+        // SEARCH USER BY NICKNAME ON DATABASE
         User user = userRepository.findByNickname(nickname)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with nickname: " + nickname));
 
-        // Create an authority based on the user's role
+        // CREATE AN AUTHORITY BASED ON THE USER'S ROLE
         SimpleGrantedAuthority authority = new SimpleGrantedAuthority(user.getRole().getName());
 
-        // Return a new UserDetails object to be used by Spring Security
+        // RETURN A NEW USERDETAILS OBJECT TO BE USED BY SPRING SECURITY
         return new org.springframework.security.core.userdetails.User(
                 user.getNickname(),
                 user.getPassword(),

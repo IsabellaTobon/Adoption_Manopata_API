@@ -1,4 +1,4 @@
--- Insertar 5 usuarios si no existen
+-- INSERT 5 USERS IF THEY DO NOT EXIST
 INSERT IGNORE INTO users (name, lastname, nickname, email, password, role, active, deleted) VALUES
 ('Isabel', 'Torres', 'IsabelT', 'isabel.torres@example.com', 'password1', 'USER', true, false),
 ('Carlos', 'Fernandez', 'CarlosF', 'carlos.fernandez@example.com', 'password2', 'USER', true, false),
@@ -6,14 +6,14 @@ INSERT IGNORE INTO users (name, lastname, nickname, email, password, role, activ
 ('Maria', 'Lopez', 'MariaL', 'maria.lopez@example.com', 'password4', 'USER', true, false),
 ('Juan', 'Martinez', 'JuanM', 'juan.martinez@example.com', 'password5', 'USER', true, false);
 
--- Insertar 4 comentarios si no existen
+-- INSERT 4 COMMENTS IF THEY DO NOT EXIST
 INSERT IGNORE INTO comments (name, text, rating, userId) VALUES
 ('IsabelT', 'Este sitio es increíble, adopté mi mascota y estoy muy contenta', 5, 1),
 ('CarlosF', 'Muy buen servicio, pero podrían mejorar el diseño', 4, 2),
 ('LuciaG', 'Tuve un problema con un anuncio, pero fue resuelto rápidamente', 4, 3),
 ('MariaL', 'Excelente lugar para encontrar una nueva mascota', 5, 4);
 
--- Insertar 18 posts si no existen, usando URLs de imágenes libres
+-- INSERT 18 POSTS IF THEY DO NOT EXIST, USING FREE IMAGE URLS
 INSERT IGNORE INTO posts (photo, registerDate, name, age, animalType, vaccinated, breed, ppp, city, province, available, likes, userId, description) VALUES
 ('https://images.pexels.com/photos/12381233/pexels-photo-12381233.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', CURRENT_TIMESTAMP, 'Buddy', 2, 'Perro', true, 'Golden Retriever', false, 'Madrid', 'Madrid', true, 10, 1, 'Un perro amigable y juguetón en busca de un nuevo hogar.'),
 ('https://images.pexels.com/photos/5200916/pexels-photo-5200916.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', CURRENT_TIMESTAMP, 'Mimi', 1, 'Gato', true, 'Siames', false, 'Barcelona', 'Cataluña', true, 8, 2, 'Una gata dulce y tranquila que busca un hogar amoroso.'),

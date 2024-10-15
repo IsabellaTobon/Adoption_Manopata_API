@@ -14,32 +14,32 @@ public class ProtectorsService {
     @Autowired
     private ProtectorsRepository protectorsRepository;
 
-    // Get all protectors
+    // GET ALL PROTECTORS
     public List<Protector> getAllProtectors() {
         return protectorsRepository.findAll();
     }
 
-    // Obtener todas las provincias
+    // OBTAIN ALL PROVINCES
     public List<String> getAllProvinces() {
         return protectorsRepository.findAllProvinces();
     }
 
-    // Obtener ciudades según la provincia
+    // GET CITIES BY PROVINCE
     public List<String> getCitiesByProvince(String province) {
         return protectorsRepository.findCitiesByProvince(province);
     }
 
-    // Search protector by id
+    // SEARCH PROTECTOR BY ID
     public Optional<Protector> getProtectorById(Long id) {
         return protectorsRepository.findById(id);
     }
 
-    // Search protector by name
+    // SEARCH PROTECTOR BY NAME
     public Optional<Protector> getProtectorByName(String name) {
         return protectorsRepository.findByName(name);
     }
 
-    // Create a new protector
+    // CREATE NEW PROTECTOR
     public Protector createProtector(Protector protector) {
         if (protector.getPhoto() == null || protector.getPhoto().isEmpty()) {
             protector.setPhoto("/images/default-protector.jpg");
@@ -47,7 +47,7 @@ public class ProtectorsService {
         return protectorsRepository.save(protector);
     }
 
-    // Update a protector
+    // UPDATE PROTECTOR
     public Protector updateProtector(Long id, Protector protectorDetails) {
         return protectorsRepository.findById(id)
                 .map(protector -> {
@@ -65,7 +65,7 @@ public class ProtectorsService {
                 }).orElseThrow(() -> new RuntimeException("Protector not found"));
     }
 
-    // Delete a protector
+    // DELETE PROTECTOR
     public void deleteProtector(Long id) {
         protectorsRepository.deleteById(id);
     }

@@ -19,27 +19,27 @@ public class ProtectorsController {
     @Autowired
     private ProtectorsService protectorsService;
 
-    // Obtain all protectors
+    // OBTAIN ALL PROTECTORS
     @GetMapping
     public ResponseEntity<List<Protector>> getAllProtectors() {
         List<Protector> protectors = protectorsService.getAllProtectors();
         return ResponseEntity.ok(protectors);
     }
-    // Obtener provincias
+    // OBTAIN PROVINCES
     @GetMapping("/provinces")
     public ResponseEntity<List<String>> getAllProvinces() {
         List<String> provinces = protectorsService.getAllProvinces();
         return ResponseEntity.ok(provinces);
     }
 
-    // Obtener ciudades por provincia
+    // GET CITIES BY PROVINCE
     @GetMapping("/cities")
     public ResponseEntity<List<String>> getCities(@RequestParam String province) {
         List<String> cities = protectorsService.getCitiesByProvince(province);
         return ResponseEntity.ok(cities);
     }
 
-    // Obtain protector by id
+    // OBTAIN PROTECTOR BY ID
     @GetMapping("/{id}")
     public ResponseEntity<Protector> getProtectorById(@PathVariable Long id) {
         Optional<Protector> protectors = protectorsService.getProtectorById(id);
@@ -48,19 +48,19 @@ public class ProtectorsController {
     }
 
     @GetMapping("/name/{name}")
-    public ResponseEntity<Protector> getProtectorByName(@PathVariable String name) { // New endpoint
+    public ResponseEntity<Protector> getProtectorByName(@PathVariable String name) { // NEW ENDPOINT
         Optional<Protector> protector = protectorsService.getProtectorByName(name);
         return protector.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Create a new protector
+    // CREATE A NEW PROTECTOR
     @PostMapping
     public Protector createProtector(@RequestBody Protector protector) {
         return protectorsService.createProtector(protector);
     }
 
-    // Update a protector
+    // UPDATE A PROTECTOR
     @PutMapping("/{id}")
     public ResponseEntity<Protector> updateProtector(@PathVariable Long id, @RequestBody Protector protectorDetails) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -77,7 +77,7 @@ public class ProtectorsController {
         return ResponseEntity.ok(updatedProtector);
     }
 
-    // Delete a protector
+    // DELETE A PROTECTOR
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProtector(@PathVariable Long id) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

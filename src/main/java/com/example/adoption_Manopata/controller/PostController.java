@@ -52,10 +52,10 @@ public class PostController {
             @RequestParam(required = false) Boolean isPPP,
             @RequestParam(required = false) Boolean vaccinated,
             Pageable pageable,
-            PagedResourcesAssembler<Post> assembler,  // Usamos PagedResourcesAssembler
-            Principal principal // Para obtener el usuario autenticado
+            PagedResourcesAssembler<Post> assembler,
+            Principal principal // TO GET THE AUTHENTICATED USER
     ) {
-        // Obtener los posts filtrados
+        // GET THE FILTERED POSTS
         Page<Post> posts = postService.getFilteredPosts(province, city, breed, animalType, available, isPPP, vaccinated, pageable);
 
         final User user;
@@ -76,13 +76,13 @@ public class PostController {
             }
         });
 
-        // Convertir a PagedModel<EntityModel<Post>>
+        // CONVERT TO PAGEDMODEL<ENTITYMODEL<POST>>
         PagedModel<EntityModel<Post>> pagedModel = assembler.toModel(posts);
 
         return ResponseEntity.ok(pagedModel);
     }
 
-    // Obtain post by id
+    // OBTAIN POST BY ID
     @GetMapping("/{id}")
     public ResponseEntity<Post> getPostById(@PathVariable Long id) {
         Optional<Post> post = postService.getPostById(id);
@@ -96,41 +96,41 @@ public class PostController {
         return ResponseEntity.ok(posts);
     }
 
-    // Create a new post
+    // CREATE A NEW POST
     @PostMapping("/create")
     public ResponseEntity<?> createPost(
             @RequestParam("file") MultipartFile file,
             @RequestParam("post") String postJson,
             Principal principal) {
         try {
-            // Validar si la imagen está presente
+            // VALIDATE IF THE IMAGE IS PRESENT
             if (file.isEmpty()) {
                 return ResponseEntity.badRequest().body("La imagen es obligatoria");
             }
 
-            // Convertir el JSON del post a un objeto Post usando ObjectMapper
+            // CONVERTING POST JSON TO A POST OBJECT USING OBJECTMAPPER
             ObjectMapper objectMapper = new ObjectMapper();
             Post post = objectMapper.readValue(postJson, Post.class);
 
-            // Obtener el usuario autenticado
-            String nickname = principal.getName(); // Extrae el nombre del usuario autenticado
-            User user = userService.findByNickname(nickname).orElse(null); // Obtén el usuario por el nombre de usuario
+            // GET THE AUTHENTICATED USER
+            String nickname = principal.getName(); // EXTRACTS THE NAME OF THE AUTHENTICATED USER
+            User user = userService.findByNickname(nickname).orElse(null); // GET THE USER BY USERNAME
 
             if (user == null) {
                 return ResponseEntity.badRequest().body("Usuario no encontrado");
             }
 
-            // Asignar el usuario al post
+            // ASSIGN THE USER TO THE POST
             post.setUser(user);
 
-            // Guardar la imagen
+            // SAVE IMAGE
             String fileName = fileStorageService.storeFile(file);
 
-            // Configurar la ruta de la imagen
+            // SETTING THE IMAGE PATH
             post.setPhoto("/uploads/" + fileName);
             post.setRegisterDate(new Date());
 
-            // Guardar el post en la base de datos
+            // SAVE THE POST TO THE DATABASE
             postService.createPost(post);
 
             return ResponseEntity.ok(Collections.singletonMap("message", "Post creado exitosamente"));
@@ -139,14 +139,14 @@ public class PostController {
         }
     }
 
-    // Incrementar likes de un post
+    // INCREASE LIKES OF A POST
     @PostMapping("/{id}/like")
     public ResponseEntity<?> likePost(@PathVariable Long id, Principal principal) {
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no autenticado");
         }
 
-        String nickname = principal.getName();  // Usamos el nombre de usuario autenticado (nickname)
+        String nickname = principal.getName();  // WE USE THE AUTHENTICATED USERNAME (NICKNAME)
         Optional<User> userOpt = userService.findByNickname(nickname);
         if (!userOpt.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
@@ -159,57 +159,57 @@ public class PostController {
         }
         Post post = postOpt.get();
 
-        // Verificar si el usuario ya dio like
+        // CHECK IF THE USER HAS ALREADY GIVEN A LIKE
         if (post.getLikedByUsers().contains(user)) {
-            // Si ya dio like, lo quitamos y reducimos los likes
+            // IF USER GAVE A LIKE, WE REMOVE IT AND REDUCE THE LIKES
             post.getLikedByUsers().remove(user);
             post.setLikes(post.getLikes() - 1);
         } else {
-            // Si no ha dado like, lo añadimos y aumentamos los likes
+            // IF THE USER DID NOT LIKE, WE ADD IT AND INCREASE THE LIKES
             post.getLikedByUsers().add(user);
             post.setLikes(post.getLikes() + 1);
         }
 
-        postRepository.save(post);  // Guardar los cambios usando el repositorio directamente
+        postRepository.save(post);  // SAVE CHANGES USING THE REPOSITORY DIRECTLY
         return ResponseEntity.ok(Collections.singletonMap("likes", post.getLikes()));
     }
 
-    // Obtener todas las provincias
+    // GET ALL PROVINCES
     @GetMapping("/provinces")
     public ResponseEntity<List<String>> getProvinces() {
         List<String> provinces = postService.getAllProvinces();
         return ResponseEntity.ok(provinces);
     }
 
-    // Obtener ciudades según la provincia
+    // GET CITIES BY PROVINCE
     @GetMapping("/cities")
     public ResponseEntity<List<String>> getCities(@RequestParam String province) {
         List<String> cities = postService.getCitiesByProvince(province);
         return ResponseEntity.ok(cities);
     }
 
-    // Obtener razas según el tipo de animal
+    // GET BREEDS ACCORDING TO THE TYPE OF ANIMAL
     @GetMapping("/breeds")
     public ResponseEntity<List<String>> getBreeds(@RequestParam String animalType) {
         List<String> breeds = postService.getBreedsByAnimalType(animalType);
         return ResponseEntity.ok(breeds);
     }
 
-    // Update a post
+    // UPDATE A POST
     @PutMapping("/{id}")
     public ResponseEntity<Post> updatePost(@PathVariable Long id, @RequestBody Post postDetails) {
         Post post = postService.updatePost(id, postDetails);
         return ResponseEntity.ok(post);
     }
 
-    // Delete a post
+    // DELETE A POST
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable Long id) {
         postService.deletePost(id);
         return ResponseEntity.ok().build();
     }
 
-    // Obtain posts by user id
+    // OBTAIN POSTS BY USER ID
     @GetMapping("/user/{userId}")
     public Page<Post> getPostsByUser(@PathVariable Long userId,
                                      @RequestParam(defaultValue = "0") int page,

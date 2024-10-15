@@ -1,4 +1,4 @@
--- Eliminar tablas si existen para evitar conflictos
+-- DELETE TABLES IF THEY EXIST TO AVOID CONFLICTS
 DROP TABLE IF EXISTS posts_likedByUsers;
 DROP TABLE IF EXISTS messages;
 DROP TABLE IF EXISTS comments;
@@ -7,13 +7,13 @@ DROP TABLE IF EXISTS protectors;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS roles;
 
--- Crear la tabla de roles
+-- CREATE ROLES TABLE
 CREATE TABLE IF NOT EXISTS roles (
     name VARCHAR(20) PRIMARY KEY NOT NULL,
     description VARCHAR(100) NOT NULL
 );
 
--- Crear la tabla de usuarios
+-- CREATE USERS TABLE
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,
     photo VARCHAR(255) DEFAULT NULL,
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS users (
     FOREIGN KEY (role) REFERENCES roles(name)
 );
 
--- Crear la tabla de protectores
+-- CREATE PROTECTORS TABLE
 CREATE TABLE IF NOT EXISTS protectors (
     id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,
     name VARCHAR(50) NOT NULL,
@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS protectors (
     web_site VARCHAR(255)
 );
 
--- Crear la tabla de posts
+-- CREATE POST TABLE
 CREATE TABLE IF NOT EXISTS posts (
     id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,
     photo TEXT NOT NULL,
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS posts (
     FOREIGN KEY (protector_id) REFERENCES protectors(id)
 );
 
--- Crear la tabla de unión para los likes entre posts y usuarios
+-- CREATE THE UNION TABLE FOR LIKES BETWEEN POSTS AND USERS
 CREATE TABLE IF NOT EXISTS posts_likedByUsers (
     post_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS posts_likedByUsers (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Crear la tabla de mensajes
+-- CREATE MESSAGES TABLE
 CREATE TABLE IF NOT EXISTS messages (
     id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,
     bodyText TEXT NOT NULL,
@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS messages (
     FOREIGN KEY (parentMessageId) REFERENCES messages(id) ON DELETE SET NULL
 );
 
--- Crear la tabla de comentarios
+-- CREATE COMMENTS TABLE
 CREATE TABLE IF NOT EXISTS comments (
     id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,
     name VARCHAR(50) NOT NULL,

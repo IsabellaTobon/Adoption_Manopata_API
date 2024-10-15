@@ -20,16 +20,16 @@ import java.util.stream.Collectors;
 @Service
 public class JwtUtil {
 
-    // Base64 encoded secret key for signing the token
+    // BASE64 ENCODED SECRET KEY FOR SIGNING THE TOKEN
     private final String SECRET_KEY_BASE64 = "qsnwZKi/aBxrrh1ATH3UoZx62I9Lkx7JgPxaCXuqSC8=";
 
 
-    // Method to decode the key and obtain the signature key
+    // METHOD TO DECODE THE KEY AND OBTAIN THE SIGNATURE KEY
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(Base64.getDecoder().decode(SECRET_KEY_BASE64));
     }
 
-    // Method to generate a JWT token
+    // METHOD TO GENERATE A JWT TOKEN
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = Map.of("roles", userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
@@ -44,7 +44,7 @@ public class JwtUtil {
                 .compact();
     }
 
-    // Method to generate a JWT token with email
+    // METHOD TO GENERATE A JWT TOKEN WITH EMAIL
     public String generateTokenWithEmail(String email) {
         return Jwts.builder()
                 .setSubject(email)
@@ -54,7 +54,7 @@ public class JwtUtil {
                 .compact();
     }
 
-    // Method to generate a JWT token for password reset
+    // METHOD TO GENERATE A JWT TOKEN FOR PASSWORD RESET
     public String generatePasswordResetToken(User user) {
         Map<String, Object> claims = Map.of("email", user.getEmail());
 
@@ -67,12 +67,12 @@ public class JwtUtil {
                 .compact();
     }
 
-    // Method to extract username from JWT token
+    // METHOD TO EXTRACT USERNAME FROM JWT TOKEN
     public String extractNickname(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    // Method to resolve the token from the request
+    // METHOD TO RESOLVE THE TOKEN FROM THE REQUEST
     public String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
@@ -81,33 +81,33 @@ public class JwtUtil {
         return null;
     }
 
-    // Method to extract any type of claim from the JWT token
+    // METHOD TO EXTRACT ANY TYPE OF CLAIM FROM THE JWT TOKEN
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
-    // Method to extract all claims from the JWT token
+    // METHOD TO EXTRACT ALL CLAIMS FROM THE JWT TOKEN
     public Claims extractAllClaims(String token) {
         return Jwts.parser()
-                .setSigningKey(getSigningKey()) // Set the signing key
+                .setSigningKey(getSigningKey()) // SET THE SIGNING KEY
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
     }
 
-    // Method to validate the JWT token
+    // METHOD TO VALIDATE THE JWT TOKEN
     public boolean validateToken(String token, UserDetails userDetails) {
         final String nickname = extractNickname(token);
         return (nickname.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
-    // Method to check if the token has expired
+    // METHOD TO CHECK IF THE TOKEN HAS EXPIRED
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
-    // Method to extract the expiration date from the JWT token
+    // METHOD TO EXTRACT THE EXPIRATION DATE FROM THE JWT TOKEN
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }

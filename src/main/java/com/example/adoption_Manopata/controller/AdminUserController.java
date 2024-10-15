@@ -18,13 +18,13 @@ public class AdminUserController {
     @Autowired
     private UserService userService;
 
-    // Obtain all users
+    // OBTAIN ALL USERS
     @GetMapping
     public List<User> getAllUsers() {
         return userService.getAllUsers();
     }
 
-    // Obtain user by id
+    // OBTAIN USER BY ID
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
         Optional<User> user = userService.getUserById(id);
@@ -32,24 +32,24 @@ public class AdminUserController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Update user
+    // UPDATE USER
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
         User updatedUser = userService.updateUser(id, userDetails);
         return ResponseEntity.ok(updatedUser);
     }
 
-    // Desactivar usuario
+    // DEACTIVATE USER
     @PostMapping("/{id}/deactivate")
     public ResponseEntity<Void> deactivateUser(@PathVariable Long id) {
-        userService.deactivateUser(id);  // Desactivar al usuario sin contraseña
+        userService.deactivateUser(id);  // DEACTIVATE USER WITHOUT PASSWORD
         return ResponseEntity.ok().build();
     }
 
-    // Eliminar permanentemente un usuario (solo admin)
+    // CENTRALIZED METHOD FOR OBTAINING AUTHORIZATION HEADERS
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        userService.deleteUserByAdmin(id);  // Cambiar a deleteUserByAdmin
+        userService.deleteUserByAdmin(id);  // CHANGE TO deleteUserByAdmin
         return ResponseEntity.ok().build();
     }
 }

@@ -1,4 +1,4 @@
--- Insertar 8 protectoras
+-- INSERT 8 PROTECTORS
 INSERT IGNORE INTO protectors (photo, name, username, password, description, phone, email, city, province, web_site) VALUES
 ('http://localhost:8080/images/AdoptaUnAmigo.jpg', 'AdoptaUnAmigo', 'adopta_un_amigo', 'SecurePassword1', 'Nos dedicamos a encontrar hogares para animales rescatados.', '654321987', 'info@adoptaunamigo.com', 'Madrid', 'Madrid', 'https://adoptaunamigo.com'),
 ('http://localhost:8080/images/HuellasDeAmor.jpg', 'Huellas de Amor', 'huellas_de_amor', 'SecurePassword2', 'Brindamos amor y cuidado a los animales abandonados.', '612345678', 'contacto@huellasdeamor.org', 'Barcelona', 'Cataluña', 'https://huellasdeamor.org'),

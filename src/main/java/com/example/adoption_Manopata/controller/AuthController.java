@@ -55,42 +55,42 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> createAuthenticationToken(@RequestBody AuthRequest authRequest) throws Exception {
         try {
-            // Autenticar las credenciales
+            // AUTHENTICATE CREDENTIALS
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authRequest.getNickname(), authRequest.getPassword())
             );
         } catch (BadCredentialsException e) {
-            // Si las credenciales son incorrectas, devolver un error en formato JSON
+            // IF THE CREDENTIALS ARE INCORRECT, RETURN AN ERROR IN JSON FORMAT
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("error", "Incorrect username or password");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
         }
 
-        // Cargar detalles del usuario y generar el token JWT
+        // LOAD USER DETAILS AND GENERATE JWT TOKEN
         final UserDetails userDetails = userDetailsService.loadUserByUsername(authRequest.getNickname());
         final String jwt = jwtUtil.generateToken(userDetails);
 
-        // Obtener el rol del usuario desde UserDetails
+        // GET THE USER ROLE FROM UserDetails
         String role = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .findFirst()
-                .orElse("USER");  // Por defecto, asignamos el rol 'USER'
+                .orElse("USER");  // BY DEFAULT, WE ASSIGN THE ROLE 'USER'
 
-        // Obtener el usuario desde la base de datos para obtener el ID
+        // GET THE USER FROM THE DATABASE TO GET THE ID
         Optional<User> userOptional = userService.findByNickname(authRequest.getNickname());
         if (!userOptional.isPresent()) {
-            // En caso de que no se encuentre el usuario, devolver un error
+            // IF THE USER IS NOT FOUND, RETURN AN ERROR
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("error", "User not found"));
         }
 
         User user = userOptional.get();
         Long userId = user.getId();
 
-        // Crear una respuesta JSON con el token, rol y userId
+        // CREATE A JSON RESPONSE WITH THE TOKEN, ROLE AND USERID
         Map<String, Object> response = new HashMap<>();
         response.put("token", jwt);
         response.put("role", role);
-        response.put("userId", userId);  // Añadir el userId a la respuesta
+        response.put("userId", userId);  // ADD THE USERID TO THE RESPONSE
 
         return ResponseEntity.ok(response);
     }
@@ -99,29 +99,29 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> registerUser(@RequestBody User user) {
 
         try {
-            // Delegate user creation to the service, which handles the role and validation
+            // DELEGATE USER CREATION TO THE SERVICE, WHICH HANDLES THE ROLE AND VALIDATION
             userService.createUser(user);
 
-            // Create a response map with a message
+            // CREATE A RESPONSE MAP WITH A MESSAGE
             Map<String, String> response = new HashMap<>();
             response.put("message", "Usuario registrado correctamente.");
 
-            // Return the response as JSON
+            // RETURN THE RESPONSE AS JSON
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
-            // Return validation error in JSON format
+            // RETURN VALIDATION ERROR IN JSON FORMAT
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", e.getMessage());
             return ResponseEntity.badRequest().body(errorResponse);
         } catch (Exception e) {
-            // Return general error in JSON format
+            // RETURN GENERAL ERROR IN JSON FORMAT
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", "Ocurrió un error: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 
-    // RECUPERACIÓN DE CONTRASEÑA
+    // PASSWORD RECOVERY
     @PostMapping("/forgot-password")
     public ResponseEntity<Map<String, String>> forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest) {
         User user = userService.findByEmail(forgotPasswordRequest.getEmail())
@@ -138,7 +138,7 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    // CAMBIO DE CONTRASEÑA
+    // CHANGE PASSWORD
     @PostMapping("/change-password")
     public ResponseEntity<Map<String, String>> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
         UserDetails loggedInUser = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -156,7 +156,7 @@ public class AuthController {
         }
     }
 
-    // RESTABLECIMIENTO DE CONTRASEÑA
+    // RESET PASSWORD
     @PostMapping("/reset-password")
     public ResponseEntity<Map<String, String>> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
         String token = resetPasswordRequest.getToken();
@@ -182,18 +182,18 @@ public class AuthController {
         }
     }
 
-    // DESACTIVAR CUENTA
+    // DEACTIVATE ACCOUNT
     @PostMapping("/deactivate-account")
     public ResponseEntity<String> deactivateAccount(@RequestBody DeleteAccountRequest deleteAccountRequest) {
         User user = userService.findByNickname(deleteAccountRequest.getNickname())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado."));
 
-        // Verificar la contraseña proporcionada
+        // VERIFY THE PASSWORD PROVIDED
         if (!passwordEncoder.matches(deleteAccountRequest.getPassword(), user.getPassword())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Contraseña incorrecta.");
         }
 
-        // Desactivar al usuario
+        // DEACTIVATE USER
         userService.deactivateUser(user.getId(), deleteAccountRequest.getPassword());
 
         return ResponseEntity.ok("Cuenta desactivada exitosamente.");

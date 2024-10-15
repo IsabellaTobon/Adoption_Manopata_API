@@ -54,23 +54,22 @@ public class PostService {
         postRepository.save(post);
     }
 
-    // Obtener todas las provincias desde la tabla de posts
+    // GET ALL PROVINCES FROM THE POSTS TABLE
     public List<String> getAllProvinces() {
         return postRepository.findAllProvinces();
     }
 
-    // Obtener las ciudades según la provincia desde la tabla de posts
+    // GET THE CITIES ACCORDING TO THE PROVINCE FROM THE POSTS TABLE
     public List<String> getCitiesByProvince(String province) {
         return postRepository.findCitiesByProvince(province);
     }
 
-    // Obtener las razas según el tipo de animal desde la tabla de posts
+    // GET THE BREEDS ACCORDING TO THE TYPE OF ANIMAL FROM THE POSTS TABLE
     public List<String> getBreedsByAnimalType(String animalType) {
         return postRepository.findBreedsByAnimalType(animalType);
     }
 
-
-    // Update a post
+    // UPDATE POST
     public Post updatePost(Long id, Post postDetails) {
         return postRepository.findById(id)
                 .map(post -> {
@@ -92,25 +91,25 @@ public class PostService {
                 }).orElseThrow(() -> new RuntimeException("Post not found"));
     }
 
-    // Delete a post
+    // DELETE POST
     public void deletePost(Long id) {
         postRepository.findById(id).ifPresent(post -> {
-            // Ruta donde están almacenadas las imágenes
+            // PATH WHERE THE IMAGES ARE STORED
             Path imagePath = Paths.get("path/to/your/images/directory", post.getPhoto());
 
-            // Eliminar la imagen asociada
+            // DELETE THE ASSOCIATED IMAGE
             try {
                 Files.deleteIfExists(imagePath);
             } catch (IOException e) {
                 throw new RuntimeException("Error al eliminar la imagen asociada", e);
             }
 
-            // Eliminar el post
+            // DELETE POST
             postRepository.deleteById(id);
         });
     }
 
-    // Increase likes of a post
+    // INCREASE LIKES OF A POST
     public Post incrementLikes(Long postId) {
         Optional<Post> optionalPost = postRepository.findById(postId);
 
@@ -124,7 +123,7 @@ public class PostService {
         }
     }
 
-    // Obtain all posts by user id
+    // OBTAIN ALL POSTS BY USER ID
     public Page<Post> getPostsByUser(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return postRepository.findByUserId(userId, pageable);

@@ -30,21 +30,21 @@ public class MessageController {
     private PostService postService;
 
     /**
-     * Enviar un mensaje entre usuarios
+     * SEND A MESSAGE BETWEEN USERS
      *
-     * @param payload Cuerpo del mensaje que incluye senderId, receiverId, bodyText, y postId
-     * @return Message creado
+     * @param payload MESSAGE BODY INCLUDING SENDERID, RECEIVERID, BODYTEXT, AND POSTID
+     * @return MESSAGE CREATE
      */
     @PostMapping("/send")
     public ResponseEntity<?> sendMessage(@RequestBody @Valid Map<String, Object> payload) {
         try {
-            // Extraer senderId, receiverId, bodyText, y postId desde el JSON
+            // EXTRACT SENDERID, RECEIVERID, BODYTEXT, AND POSTID FROM THE JSON
             Long senderId = Long.valueOf(payload.get("senderId").toString());
             Long receiverId = Long.valueOf(payload.get("receiverId").toString());
             String bodyText = payload.get("bodyText").toString();
             Long postId = Long.valueOf(payload.get("postId").toString());
 
-            // Obtener sender, receiver y post a partir de sus IDs
+            // GET SENDER, RECEIVER AND POST FROM THEIR IDS
             Optional<User> senderOpt = userService.getUserById(senderId);
             Optional<User> receiverOpt = userService.getUserById(receiverId);
             Optional<Post> postOpt = postService.getPostById(postId);
@@ -65,21 +65,21 @@ public class MessageController {
             User receiver = receiverOpt.get();
             Post post = postOpt.get();
 
-            // Crear el mensaje y enviarlo
+            // CREATE THE MESSAGE AND SEND IT
             Message message = messageService.sendMessage(sender, receiver, bodyText, post);
             return ResponseEntity.status(HttpStatus.CREATED).body(message);
         } catch (Exception e) {
-            // Manejar error inesperado
+            // HANDLING UNEXPECTED ERROR
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error while sending the message: " + e.getMessage());
         }
     }
 
     /**
-     * Obtener los mensajes recibidos en la bandeja de entrada del usuario
+     * GET MESSAGES RECEIVED IN THE USER'S INBOX
      *
-     * @param userId Id del usuario que recibe los mensajes
-     * @return Lista de mensajes recibidos
+     * @param userId ID OF THE USER WHO RECEIVES THE MESSAGES
+     * @return LIST OF RECEIVED MESSAGES
      */
     @GetMapping("/inbox")
     public ResponseEntity<?> getInboxMessages(@RequestParam Long userId) {
@@ -92,7 +92,7 @@ public class MessageController {
             List<Message> messages = messageService.getInboxMessages(userId);
             return ResponseEntity.ok(messages);
         } catch (Exception e) {
-            // Manejar error inesperado
+            // HANDLING UNEXPECTED ERROR
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error while retrieving inbox messages: " + e.getMessage());
         }

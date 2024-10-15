@@ -17,12 +17,12 @@ public class CommentService {
         return commentRepository.existsByUser(user);
     }
 
-    // Método para guardar un nuevo comentario
+    // METHOD TO SAVE A NEW COMMENT
     public Comment saveComment(Comment comment) {
         return commentRepository.save(comment);
     }
 
-    // Método para obtener todos los comentarios
+    // METHOD TO GET ALL COMMENTS
     public List<Comment> getAllComments() {
         return commentRepository.findAll();
     }

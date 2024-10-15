@@ -10,6 +10,6 @@ public class SecretKeyGenerator {
         keyGen.init(256);
         SecretKey secretKey = keyGen.generateKey();
         String base64Key = Base64.getEncoder().encodeToString(secretKey.getEncoded());
-        System.out.println(base64Key); // New Base64 encoded secret key
+        System.out.println(base64Key); // NEW BASE64 ENCODED SECRET KEY
     }
 }
